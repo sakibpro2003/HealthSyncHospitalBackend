@@ -1,8 +1,9 @@
 import mongoose, { Schema } from "mongoose";
-import { type IUser, UserRole } from "./user.interface";
+import { type IUser, type UserModel, UserRole } from "./user.interface";
 import bcrypt from "bcrypt";
 import config from "../../config";
-const userSchema = new Schema<IUser>(
+import type { Model } from "mongoose";
+const userSchema = new Schema<IUser, UserModel>(
   {
     name: {
       type: String,
@@ -14,10 +15,16 @@ const userSchema = new Schema<IUser>(
       unique: true,
       lowercase: true,
     },
+    phone: {
+      type: String,
+      required: true,
+      unique: true,
+    },
     password: {
       type: String,
       required: true,
     },
+
     role: {
       type: String,
       enum: [UserRole.ADMIN, UserRole.USER],
@@ -69,6 +76,7 @@ const userSchema = new Schema<IUser>(
   }
 );
 
+//hash password before storing
 userSchema.pre("save", async function (next) {
   const user = this;
   user.password = await bcrypt.hash(
@@ -78,15 +86,18 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
+userSchema.statics.isPasswordMatched = async function (
+  plainTextPassword,
+  hashedPassword
+): Promise<boolean> {
+  return await bcrypt.compare(plainTextPassword, hashedPassword);
+};
+
+//hide password
 userSchema.post("save", async function (doc, next) {
   doc.password = "";
   next();
 });
 
-// userSchema.methods.toJSON = function () {
-//   const userObject = this.toObject();
-//   delete userObject.password;
-//   return userObject;
-// };
-
-export const User = mongoose.model<IUser>("User", userSchema);
+export const User = mongoose.model<IUser, UserModel>("User", userSchema);
+// export default User;

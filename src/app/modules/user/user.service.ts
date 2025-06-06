@@ -1,13 +1,15 @@
 import { StatusCodes } from "http-status-codes";
 import AppError from "../../errors/appError";
 import { User } from "./user.model";
+import type { IUser } from "./user.interface";
 
-const registerUser = async (userData) => {
-  const { name, email, password, role } = userData;
-  if (!userData.name || !userData.email) {
+const registerUser = async (userData: IUser) => {
+  const { name, email, password, role ,phone} = userData;
+  if (!userData.name || !userData.email || !userData.phone) {
     throw new AppError(StatusCodes.BAD_REQUEST, "Name and email are required");
   }
-  const result = await User.create({ name, email, password, role });
+  console.log(userData,"service")
+  const result = await User.create(userData);
   return result;
 };
 

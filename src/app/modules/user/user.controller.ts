@@ -5,8 +5,7 @@ import catchAsync from "../../utils/catchAsync";
 
 const registerUser = catchAsync(async (req, res) => {
   const userData = req.body;
-  console.log(userData,'userData controller')
-  const result = await UserServices.registerUser(userData );
+  const result = await UserServices.registerUser(userData);
   sendResponse(res, {
     statusCode: StatusCodes.OK,
     success: true,

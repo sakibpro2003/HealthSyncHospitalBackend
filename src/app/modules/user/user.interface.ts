@@ -1,3 +1,5 @@
+import type { Model } from "mongoose";
+
 export enum UserRole {
   ADMIN = "admin",
   USER = "user",
@@ -9,6 +11,7 @@ export interface IUser {
   name: string;
   role: UserRole;
   hasShop: boolean;
+  phone: string;
   // clientInfo: {
   //   device: "pc" | "mobile"; // Device type
   //   browser: string; // Browser name
@@ -22,4 +25,13 @@ export interface IUser {
   otpToken?: string | null;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface UserModel extends Model<IUser> {
+  isPasswordMatched(
+    plainTextPassword: string,
+    hashedPassword: string
+  ): Promise<boolean>;
+  isUserExistsByEmail(id: string): Promise<IUser>;
+  checkUserExist(userId: string): Promise<IUser>;
 }

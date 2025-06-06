@@ -1,6 +1,7 @@
 import { type Request, type Response } from "express";
 import express from "express";
 import { UserRoutes } from "../modules/user/user.route";
+import { AuthRoutes } from "../modules/auth/auth.routes";
 
 const router = express.Router();
 const moduleRoutes = [
@@ -8,6 +9,10 @@ const moduleRoutes = [
     path: "/user",
     route: UserRoutes,
   },
+  {
+    path:"/auth",
+    route:AuthRoutes,
+  }
 ];
 
 router.get("/test", (req: Request, res: Response) => {

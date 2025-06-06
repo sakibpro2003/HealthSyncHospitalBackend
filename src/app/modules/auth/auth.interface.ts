@@ -1,3 +1,5 @@
+import type { UserRole } from "../user/user.interface";
+
 export interface IAuth {
   email: string;
   password: string;
@@ -9,4 +11,11 @@ export interface IAuth {
     os?: string;
     userAgent?: string;
   };
+}
+
+export interface IJWTPayload {
+  userId: string;
+  name: string;
+  email: string;
+  role: UserRole;
 }
