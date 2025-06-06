@@ -12,7 +12,17 @@ const registerPatient = catchAsync(async (req, res) => {
     data: { result },
   });
 });
+const deletePatient = catchAsync(async (req, res) => {
+  const result = await PatientService.deletePatient(req.body);
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    message: "Patient deleted successfully",
+    success: true,
+    data: { result },
+  });
+});
 
 export const PatientController = {
   registerPatient,
+  deletePatient,
 };
