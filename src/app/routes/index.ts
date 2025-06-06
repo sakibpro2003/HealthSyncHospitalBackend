@@ -2,6 +2,7 @@ import { type Request, type Response } from "express";
 import express from "express";
 import { UserRoutes } from "../modules/user/user.route";
 import { AuthRoutes } from "../modules/auth/auth.routes";
+import { PatientRoutes } from "../modules/patient/patient.routes";
 
 const router = express.Router();
 const moduleRoutes = [
@@ -10,9 +11,13 @@ const moduleRoutes = [
     route: UserRoutes,
   },
   {
-    path:"/auth",
-    route:AuthRoutes,
-  }
+    path: "/auth",
+    route: AuthRoutes,
+  },
+  {
+    path: "/patient",
+    route: PatientRoutes,
+  },
 ];
 
 router.get("/test", (req: Request, res: Response) => {

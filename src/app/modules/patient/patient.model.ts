@@ -21,6 +21,10 @@ const patientSchema = new Schema<IPatient>(
     email: {
       type: String,
     },
+    role:{
+        type:String,
+        default:"patient",
+    },
     phone: {
       type: String,
       required: true,

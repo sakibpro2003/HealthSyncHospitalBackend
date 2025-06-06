@@ -8,6 +8,7 @@ export interface IEmergencyContact {
 
 export interface IPatient extends Document {
   name: string;
+  role:string,
   email?: string;
   phone: string;
   dateOfBirth: string;
