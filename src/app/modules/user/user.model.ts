@@ -27,8 +27,8 @@ const userSchema = new Schema<IUser, UserModel>(
 
     role: {
       type: String,
-      enum: [UserRole.ADMIN, UserRole.USER],
-      default: UserRole.USER,
+      enum: [UserRole.ADMIN, UserRole.RECEPTIONIST],
+      default: UserRole.RECEPTIONIST,
     },
     // hasShop: {
     //   type: Boolean,

@@ -8,6 +8,9 @@ import type { IAuth, IJWTPayload } from "./auth.interface";
 import { createToken } from "./auth.utils";
 import config from "../../config";
 
+
+//TODO: session/ transaction
+
 const loginUser = async (payload: IAuth) => {
   const user = await User.findOne({ email: payload.email });
   if (!user) {
