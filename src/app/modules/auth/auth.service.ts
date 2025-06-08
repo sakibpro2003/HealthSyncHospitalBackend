@@ -1,13 +1,9 @@
 import { StatusCodes } from "http-status-codes";
 import AppError from "../../errors/appError";
-import type { IUser } from "../user/user.interface";
-// import User from "../user/user.model";
-// import User from "../user/user.model"
 import { User } from "../user/user.model";
 import type { IAuth, IJWTPayload } from "./auth.interface";
 import { createToken } from "./auth.utils";
 import config from "../../config";
-
 
 //TODO: session/ transaction
 
@@ -30,13 +26,13 @@ const loginUser = async (payload: IAuth) => {
   const accessToken = createToken(
     JWTPayload,
     config.jwt_access_secret as string,
-    config.jwt_access_expires_in as string
+    // config.jwt_access_expires_in as string
   );
 
   const refreshToken = createToken(
     JWTPayload,
     config.jwt_refresh_secret as string,
-    config.jwt_access_expires_in as string
+    // config.jwt_access_expires_in as string
   );
 
   return { accessToken, refreshToken };

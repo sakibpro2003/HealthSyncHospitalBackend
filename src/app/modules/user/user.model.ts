@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import { type IUser, type UserModel, UserRole } from "./user.interface";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import config from "../../config";
 import type { Model } from "mongoose";
 const userSchema = new Schema<IUser, UserModel>(
