@@ -29,7 +29,7 @@ const patientSchema = new Schema<IPatient>(
       type: String,
       required: true,
     },
-    releaseStauts: {
+    releaseStatus: {
       type: Boolean,
       default: false,
     },

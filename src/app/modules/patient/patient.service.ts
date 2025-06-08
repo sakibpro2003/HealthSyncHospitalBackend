@@ -8,15 +8,17 @@ const registerPatient = async (patientPayload: IPatient) => {
   return result;
 };
 const updatePatient = async (patientPayload: Partial<IPatient>) => {
-  console.log("check23");
-  // console.log(patientPayload, "payload seer");
+  const patient = await Patient.findById(patientPayload._id);
+  if (!patient) {
+    throw new AppError(StatusCodes.NOT_FOUND, "Patient not found!");
+  }
 
-  // const result = await Patient.findByIdAndUpdate(
-  //   patientPayload._id,
-  //   patientPayload,
-  //   { new: true }
-  // );
-  // return result;
+  const result = await Patient.findByIdAndUpdate(
+    patientPayload._id,
+    patientPayload,
+    { new: true }
+  );
+  return result;
 };
 const deletePatient = async (_id: string) => {
   const patient = await Patient.findOne({ _id });

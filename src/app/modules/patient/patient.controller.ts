@@ -15,6 +15,7 @@ const registerPatient = catchAsync(async (req, res) => {
 });
 
 const updatePatient = catchAsync(async (req, res) => {
+  console.log(req.body,'contoerlle')
   const result = await PatientService.updatePatient(req.body);
   sendResponse(res, {
     statusCode: StatusCodes.OK,

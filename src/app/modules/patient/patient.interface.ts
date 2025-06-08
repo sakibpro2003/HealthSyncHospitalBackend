@@ -11,7 +11,7 @@ export interface IPatient extends Document {
   role:string,
   email?: string;
   phone: string;
-  releaseStauts:boolean;
+  releaseStatus:boolean;
   dateOfBirth: string;
   gender: "male" | "female" | "other";
   address: string;
