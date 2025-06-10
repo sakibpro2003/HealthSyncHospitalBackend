@@ -3,6 +3,8 @@ import express from "express";
 import { UserRoutes } from "../modules/user/user.route";
 import { AuthRoutes } from "../modules/auth/auth.routes";
 import { PatientRoutes } from "../modules/patient/patient.routes";
+import app from "../../app";
+import globalErrorHandler from "../middleware/globalErrorHandler";
 
 const router = express.Router();
 const moduleRoutes = [
@@ -23,7 +25,7 @@ const moduleRoutes = [
 router.get("/test", (req: Request, res: Response) => {
   res.send("Test route");
 });
-
+// app.use(globalErrorHandler)
 moduleRoutes.forEach((route) => router.use(route.path, route.route));
 
 export default router;

@@ -2,9 +2,9 @@ import { StatusCodes } from "http-status-codes";
 import catchAsync from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { PatientService } from "./patient.service";
+import AppError from "../../errors/appError";
 
 const registerPatient = catchAsync(async (req, res) => {
-  console.log(req.body,'req body update constoreller')
   const result = await PatientService.registerPatient(req.body);
   sendResponse(res, {
     statusCode: StatusCodes.OK,
@@ -15,7 +15,6 @@ const registerPatient = catchAsync(async (req, res) => {
 });
 
 const updatePatient = catchAsync(async (req, res) => {
-  console.log(req.body,'contoerlle')
   const result = await PatientService.updatePatient(req.body);
   sendResponse(res, {
     statusCode: StatusCodes.OK,
@@ -36,7 +35,35 @@ const deletePatient = catchAsync(async (req, res) => {
   });
 });
 
+const getAllPatient = catchAsync(async (req, res) => {
+  const result = await PatientService.getAllPatient();
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: "Patient's retrieved successfully",
+    data: { result },
+  });
+});
+
+const getSinglePatient = catchAsync(async (req, res) => {
+  console.log(req.params, "params sdkdsksdkl");
+  const _id = req.params._id;
+  if (!_id) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "Patient ID is required");
+  }
+  const result = await PatientService.getSinglePatient(_id);
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: "Patient found",
+    data: { result },
+  });
+});
+
 export const PatientController = {
   registerPatient,
-  deletePatient,updatePatient
+  deletePatient,
+  updatePatient,
+  getAllPatient,
+  getSinglePatient,
 };

@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import { type IPatient } from "./patient.interface";
-import { required } from "zod/v4-mini";
+// import { required } from "zod/v4-mini";
 
 export const bloodGroups = [
   "A+",
@@ -58,7 +58,7 @@ const patientSchema = new Schema<IPatient>(
     emergencyContact: {
       emergencyContactName: { type: String, required: true },
       relationship: { type: String, required: true },
-      phone: { type: String, required: true },
+      emergencyContactPhone: { type: String, required: true },
     },
     occupation: {
       type: String,
@@ -74,6 +74,7 @@ const patientSchema = new Schema<IPatient>(
     },
     createdBy: {
       type: String,
+      default: "R01",
     },
   },
   {

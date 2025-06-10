@@ -1,9 +1,9 @@
 import { Document } from "mongoose";
 
 export interface IEmergencyContact {
-  name: string;
+  emergencyContactName: string;
   relationship: string;
-  phone: string;
+  emergencyContactPhone: string;
 }
 
 export interface IPatient extends Document {
@@ -22,7 +22,7 @@ export interface IPatient extends Document {
   medicalHistory?: string[];
   allergies?: string[];
   currentMedications?: string[];
-  createdBy: string; // receptionist or admin ID
+  createdBy: string; 
   createdAt?: Date;
   updatedAt?: Date;
 }
