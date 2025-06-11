@@ -47,11 +47,11 @@ const getAllPatient = catchAsync(async (req, res) => {
 
 const getSinglePatient = catchAsync(async (req, res) => {
   console.log(req.params, "params sdkdsksdkl");
-  const _id = req.params._id;
-  if (!_id) {
+  const id = req.params.id;
+  if (!id) {
     throw new AppError(StatusCodes.BAD_REQUEST, "Patient ID is required");
   }
-  const result = await PatientService.getSinglePatient(_id);
+  const result = await PatientService.getSinglePatient(id);
   sendResponse(res, {
     statusCode: StatusCodes.OK,
     success: true,
