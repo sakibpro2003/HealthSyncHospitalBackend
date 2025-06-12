@@ -9,8 +9,11 @@ const registerPatient = async (patientPayload: IPatient) => {
   return result;
 };
 
-const updatePatient = async (patientPayload: Partial<IPatient>) => {
-  const patient = await Patient.findById(patientPayload._id);
+const updatePatient = async (id: string, patientPayload: Partial<IPatient>) => {
+  const patient = await Patient.findByIdAndUpdate(
+    { _id: id, patientPayload },
+    { new: true }
+  );
   if (!patient) {
     throw new AppError(StatusCodes.NOT_FOUND, "Patient not found!");
   }

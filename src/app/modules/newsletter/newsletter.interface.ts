@@ -1,0 +1,3 @@
+interface INewsletter {
+  eamil: string;
+}

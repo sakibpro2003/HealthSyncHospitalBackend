@@ -15,7 +15,12 @@ const registerPatient = catchAsync(async (req, res) => {
 });
 
 const updatePatient = catchAsync(async (req, res) => {
-  const result = await PatientService.updatePatient(req.body);
+  const id = req.params.id;
+  if (!id) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "ID is required!");
+  }
+  const patientPayload = req.body;
+  const result = await PatientService.updatePatient(id, patientPayload);
   sendResponse(res, {
     statusCode: StatusCodes.OK,
     success: true,
