@@ -2,7 +2,6 @@ import { StatusCodes } from "http-status-codes";
 import AppError from "../../errors/appError";
 import type { IPatient } from "./patient.interface";
 import { Patient } from "./patient.model";
-import { sendResponse } from "../../utils/sendResponse";
 
 const registerPatient = async (patientPayload: IPatient) => {
   const result = await Patient.create(patientPayload);
@@ -42,18 +41,37 @@ const getSinglePatient = async (_id: string) => {
   return result;
 };
 
-const getAllPatient = async () => {
-  const result = await Patient.find();
-  return result;
-};
+const getAllPatient = async (query: Record<string, unknown>) => {
+  let searchTerm = "";
+  const queryObj = { ...query };
 
-// const updatePatient = async (_id) => {
-//   if (!_id) {
-//     throw new AppError(StatusCodes.BAD_REQUEST, "ID is required!");
-//   }
-//   const result = await Patient.findByIdAndUpdate(_id);
-//   return result;
-// };
+  if (query?.searchTerm) {
+    searchTerm = query.searchTerm as string;
+  }
+  const searchableFields = ["name", "address", "phone"];
+
+  const searchQuery = Patient.find({
+    $or: searchableFields.map((field) => ({
+      [field]: { $regex: searchTerm, $options: "i" },
+    })),
+  });
+
+  const excludeFields = ["searchTerm", "sort", "limit"];
+  excludeFields.forEach((el) => delete queryObj[el]);
+  const filterQuery = searchQuery.find(queryObj);
+  let sort = "-createdAt";
+  if (query.sort) {
+    sort = query.sort as string;
+  }
+
+  const sortQuery = filterQuery.sort(sort);
+  let limit = 1;
+  if (query.limit) {
+    limit = query.limit as number;
+  }
+  const limitQuery = sortQuery.limit(limit);
+  return sortQuery;
+};
 
 export const PatientService = {
   registerPatient,
@@ -61,5 +79,4 @@ export const PatientService = {
   updatePatient,
   getAllPatient,
   getSinglePatient,
-  // updatePatient,
 };

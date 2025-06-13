@@ -41,7 +41,7 @@ const deletePatient = catchAsync(async (req, res) => {
 });
 
 const getAllPatient = catchAsync(async (req, res) => {
-  const result = await PatientService.getAllPatient();
+  const result = await PatientService.getAllPatient(req.query);
   sendResponse(res, {
     statusCode: StatusCodes.OK,
     success: true,
