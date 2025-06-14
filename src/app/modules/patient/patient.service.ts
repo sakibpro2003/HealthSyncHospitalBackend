@@ -56,7 +56,7 @@ const getAllPatient = async (query: Record<string, unknown>) => {
     })),
   });
 
-  const excludeFields = ["searchTerm", "sort", "limit"];
+  const excludeFields = ["searchTerm", "sort", "limit", "page", "fields"];
   excludeFields.forEach((el) => delete queryObj[el]);
   const filterQuery = searchQuery.find(queryObj);
   let sort = "-createdAt";
@@ -65,12 +65,29 @@ const getAllPatient = async (query: Record<string, unknown>) => {
   }
 
   const sortQuery = filterQuery.sort(sort);
-  let limit = 1;
+  let page = 1;
+  if (query.page) {
+    page = query.page as number;
+  }
+  let limit = 10;
+  let skip = 0;
   if (query.limit) {
     limit = query.limit as number;
   }
-  const limitQuery = sortQuery.limit(limit);
-  return sortQuery;
+
+  if (query.page) {
+    page = query.page as number;
+    skip = (page - 1) * limit;
+  }
+  const paginateQuery = sortQuery.skip(skip);
+  const limitQuery = paginateQuery.limit(limit);
+  let fields = "-__v";
+  if (query.fields) {
+    fields = (query.fields as string).split(",").join(" ");
+  }
+
+  const result = await limitQuery.select(fields)
+  return result;
 };
 
 export const PatientService = {
