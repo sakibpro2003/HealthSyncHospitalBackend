@@ -47,6 +47,7 @@ const getAllPatient = catchAsync(async (req, res) => {
     success: true,
     message: "Patient's retrieved successfully",
     data: { result },
+    meta: result.meta,
   });
 });
 

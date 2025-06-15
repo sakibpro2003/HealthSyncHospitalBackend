@@ -98,7 +98,14 @@ const getAllPatient = async (query: Record<string, unknown>) => {
     .fields();
 
   const result = await patientQuery.modelQuery;
-  return result;
+  const meta = await patientQuery.countTotal();
+  // const meta = {
+  //   page,
+  //   limit,
+  //   total,
+  //   totalPage: Math.ceil(total / limit),
+  // };
+  return { meta, result };
 };
 
 export const PatientService = {
