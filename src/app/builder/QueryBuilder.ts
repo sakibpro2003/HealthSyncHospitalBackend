@@ -5,6 +5,7 @@ export class QueryBuilder<T> {
   public query: Record<string, unknown>;
 
   constructor(modelQuery: Query<T[], T>, query: Record<string, unknown>) {
+    console.log(query,'queryfrom builder')
     this.modelQuery = modelQuery;
     this.query = query;
   }
@@ -34,7 +35,7 @@ export class QueryBuilder<T> {
   async countTotal() {
     const total = await this.modelQuery.model.countDocuments();
     const page = Number(this?.query?.page) || 1;
-    const limit = Number(this?.query?.limit) || 10;
+    const limit = Number(this?.query?.limit) || 5;
     const totalPage = Math.ceil(total / limit);
     return {
       page,

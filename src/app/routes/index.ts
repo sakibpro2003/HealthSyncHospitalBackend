@@ -3,9 +3,8 @@ import express from "express";
 import { UserRoutes } from "../modules/user/user.route";
 import { AuthRoutes } from "../modules/auth/auth.routes";
 import { PatientRoutes } from "../modules/patient/patient.routes";
-import app from "../../app";
-import globalErrorHandler from "../middleware/globalErrorHandler";
 import { NewsletterRoutes } from "../modules/newsletter/newsletter.route";
+import { DoctorRoutes } from "../modules/doctor/doctor.route";
 
 const router = express.Router();
 const moduleRoutes = [
@@ -24,6 +23,10 @@ const moduleRoutes = [
   {
     path: "/newsletter",
     route: NewsletterRoutes,
+  },
+  {
+    path: "/doctor",
+    route: DoctorRoutes,
   },
 ];
 
