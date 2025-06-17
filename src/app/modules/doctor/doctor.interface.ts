@@ -4,6 +4,7 @@ export interface IDoctor {
   email: string;
   phone: string;
   department: string;
+  consultationFee:number;
   image:string,
   specialization: string;
   education: string[]; // e.g., ["MBBS - Dhaka Medical College", "FCPS - BIRDEM"]

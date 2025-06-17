@@ -10,6 +10,15 @@ const createDoctor = async (doctorData: IDoctor) => {
   return res;
 };
 
+//type to object.id
+const deleteDoctor = async (_id: string | undefined) => {
+  if (!_id) {
+    throw new AppError(StatusCodes.NOT_FOUND, "ID is Required!");
+  }
+  const res = await Doctor.findByIdAndDelete(_id);
+  return res;
+};
+
 const getAllDoctor = async (query: Record<string, unknown>) => {
   const doctorQuery = new QueryBuilder(Doctor.find(), query)
     .search(doctorSearchableFields)
@@ -23,7 +32,7 @@ const getAllDoctor = async (query: Record<string, unknown>) => {
   return { meta, result };
 };
 
-const getSingleDoctor = async (_id) => {
+const getSingleDoctor = async (_id: string | undefined) => {
   if (!_id) {
     throw new AppError(StatusCodes.NOT_FOUND, "ID is required");
   }
@@ -31,8 +40,24 @@ const getSingleDoctor = async (_id) => {
   const result = await Doctor.findById({ _id });
   return result;
 };
+const updateDoctor = async (
+  _id: string | undefined,
+  doctorPayload: Partial<IDoctor>
+) => {
+  if (!_id) {
+    throw new AppError(StatusCodes.NOT_FOUND, "ID is required");
+  }
+
+  const result = await Doctor.findByIdAndUpdate(_id, doctorPayload, {
+    new: true,
+  });
+  return result;
+};
 
 export const DoctorService = {
   createDoctor,
-  getAllDoctor,getSingleDoctor
+  getAllDoctor,
+  getSingleDoctor,
+  deleteDoctor,
+  updateDoctor,
 };

@@ -30,6 +30,10 @@ const doctorSchema = new Schema<IDoctor>(
       lowercase: true,
       trim: true,
     },
+    consultationFee: {
+      type: Number,
+      required: true,
+    },
     image: String,
     phone: {
       type: String,
