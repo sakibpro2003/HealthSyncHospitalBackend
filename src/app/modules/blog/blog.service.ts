@@ -28,6 +28,26 @@ const getAllBlog = async (query: Record<string, unknown>) => {
   };
 };
 
+const deleteBlog = async (_id: string) => {
+  if (!_id) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "ID is required");
+  }
+
+  const res = await Blog.findByIdAndDelete(_id);
+  return res;
+};
+
+const updateBlog = async (_id: string, updatePayload: Partial<IBlog>) => {
+  if (!_id) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "ID is required");
+  }
+  
+  const res = await Blog.findByIdAndUpdate(_id, updatePayload, { new: true });
+  return res;
+};
+
 const BlogService = {
   createBlog,
+  getAllBlog,
+  deleteBlog,updateBlog
 };
