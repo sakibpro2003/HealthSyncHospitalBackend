@@ -41,13 +41,22 @@ const updateBlog = async (_id: string, updatePayload: Partial<IBlog>) => {
   if (!_id) {
     throw new AppError(StatusCodes.BAD_REQUEST, "ID is required");
   }
-  
+
   const res = await Blog.findByIdAndUpdate(_id, updatePayload, { new: true });
   return res;
 };
+const getSingleBlog = async (_id: string) => {
+  if (!_id) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "ID is required");
+  }
 
-const BlogService = {
+  const res = await Blog.findById(_id);
+  return res;
+};
+
+export const BlogService = {
   createBlog,
   getAllBlog,
-  deleteBlog,updateBlog
+  deleteBlog,
+  updateBlog,getSingleBlog
 };
