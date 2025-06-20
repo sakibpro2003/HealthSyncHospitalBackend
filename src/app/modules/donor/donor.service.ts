@@ -17,6 +17,12 @@ const getAllDonor = async (query: Record<string, unknown>) => {
 
   const result = await donorQuery.modelQuery;
   const meta = await donorQuery.countTotal();
+  // console.log(result.lastDonationDate,'ress')
+  const today = new Date();
+  console.log(today);
+  {
+  }
+
   return { meta, result };
 };
 
@@ -27,5 +33,6 @@ const deleteDonor = async (_id: string) => {
 
 export const DonorService = {
   createDonor,
-  getAllDonor,deleteDonor
+  getAllDonor,
+  deleteDonor,
 };
