@@ -3,6 +3,10 @@ import { type IUser, type UserModel, UserRole } from "./user.interface";
 import bcrypt from "bcryptjs";
 import config from "../../config";
 import type { Model } from "mongoose";
+import { required } from "zod/v4-mini";
+
+const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
+
 const userSchema = new Schema<IUser, UserModel>(
   {
     name: {
@@ -19,6 +23,22 @@ const userSchema = new Schema<IUser, UserModel>(
       type: String,
       required: true,
       unique: true,
+    },
+
+    address: {
+      type: String,
+      required: true,
+    },
+    gender: {
+      type: String,
+      enum: ["male", "female", "other"],
+    },
+    dateOfBirth: {
+      type: Date,
+    },
+    bloodGroup: {
+      type: String,
+      enum: bloodGroups,
     },
     password: {
       type: String,

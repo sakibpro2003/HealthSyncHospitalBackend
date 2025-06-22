@@ -5,6 +5,16 @@ export enum UserRole {
   RECEPTIONIST = "receptionist",
 }
 
+export type IBloodGroup =
+  | "A+"
+  | "A-"
+  | "B+"
+  | "B-"
+  | "AB+"
+  | "AB-"
+  | "O+"
+  | "O-";
+
 export interface IUser {
   email: string;
   password: string;
@@ -12,6 +22,10 @@ export interface IUser {
   role: UserRole;
   hasShop: boolean;
   phone: string;
+  address: string;
+  gender: string;
+  dateOfBirth: Date;
+  bloodGroup:string,
   // clientInfo: {
   //   device: "pc" | "mobile"; // Device type
   //   browser: string; // Browser name
