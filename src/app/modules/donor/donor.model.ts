@@ -23,7 +23,7 @@ const donorSchema = new Schema<IDonor>(
     },
     gender: {
       type: String,
-      enum: ["Male", "Female", "Other"],
+      enum: ["male", "female", "other"],
     },
     phone: {
       type: String,

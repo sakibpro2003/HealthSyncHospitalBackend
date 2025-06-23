@@ -34,9 +34,20 @@ const deleteDonor = catchAsync(async (req, res) => {
     data: { result },
   });
 });
+const getSingleDonor = catchAsync(async (req, res) => {
+  const param = req.params;
+  const { _id } = param;
+  const result = await DonorService.getSingleDonor(_id);
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: "Donor retrieved successful",
+    data: { result },
+  });
+});
 
 export const DonorController = {
   createDonor,
   deleteDonor,
-  getAllDonor,
+  getAllDonor,getSingleDonor
 };

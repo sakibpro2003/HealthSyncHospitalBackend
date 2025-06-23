@@ -1,3 +1,4 @@
+// import { NextResponse } from "next/server";
 import catchAsync from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { StatusCodes } from "http-status-codes";
@@ -19,12 +20,28 @@ const loginUser = catchAsync(async (req, res) => {
     success: true,
     data: {
       //!dont return tokens
-      // accessToken,
-      // refreshToken,
+      accessToken,
+      refreshToken,
     },
   });
 });
 
+const logout = catchAsync(async (req, res) => {
+  console.log("lgout controller")
+  res.cookie("token", "", {
+    httpOnly: true,
+    expires: new Date(0),
+    path: "/",
+  });
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: "Logged out successfully",
+    data: {},
+  });
+});
+
 export const AuthController = {
-  loginUser,
+  loginUser,logout
 };
