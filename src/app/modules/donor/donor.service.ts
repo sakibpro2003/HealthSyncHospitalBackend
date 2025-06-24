@@ -30,13 +30,19 @@ const deleteDonor = async (_id: string) => {
   const res = await Donor.findByIdAndDelete(_id);
   return res;
 };
+
 const getSingleDonor = async (_id: string) => {
   const res = await Donor.findById(_id);
   return res;
 };
-
+const updateDonor = async (_id: string, updatePlayload) => {
+  const res = await Donor.findByIdAndUpdate(_id, updatePlayload, { new: true });
+  return res;
+};
 export const DonorService = {
   createDonor,
   getAllDonor,
-  deleteDonor,getSingleDonor
+  deleteDonor,
+  getSingleDonor,
+  updateDonor,
 };

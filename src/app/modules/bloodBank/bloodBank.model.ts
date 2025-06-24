@@ -35,5 +35,5 @@ const bloodBankSchema = new mongoose.Schema(
   }
 );
 
-const BloodBank = mongoose.model("BloodBank", bloodBankSchema);
+export const BloodBank = mongoose.model("BloodBank", bloodBankSchema);
 module.exports = BloodBank;

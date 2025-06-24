@@ -45,9 +45,21 @@ const getSingleDonor = catchAsync(async (req, res) => {
     data: { result },
   });
 });
+const updateDonor = catchAsync(async (req, res) => {
+  const param = req.params;
+  const { _id } = param;
+  const updatePayload = req.body;
+  const result = await DonorService.updateDonor(_id,updatePayload);
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: "Donor updated successful",
+    data: { result },
+  });
+});
 
 export const DonorController = {
   createDonor,
   deleteDonor,
-  getAllDonor,getSingleDonor
+  getAllDonor,getSingleDonor,updateDonor
 };
