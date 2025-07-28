@@ -1,25 +1,20 @@
-import mongoose from "mongoose";
+import mongoose, { model } from "mongoose";
+import type { IBlodBank } from "./bloodBank.interface";
+// import { IBlodBank } from "./bloodBank.interface";
 
 const bloodBankSchema = new mongoose.Schema(
   {
-    name: {
+    fullName: {
       type: String,
       required: true,
     },
-    location: {
-      address: String,
-      city: String,
-      district: String,
-      division: String,
-    //   coordinates: {
-    //     lat: Number,
-    //     lng: Number,
-    //   },
-    },
-    contactNumber: {
+
+    phone: {
       type: String,
       required: true,
-    //   match: /^[0-9]{10,15}$/,
+    },
+    address: {
+      type: String,
     },
     email: {
       type: String,
@@ -27,7 +22,19 @@ const bloodBankSchema = new mongoose.Schema(
     },
     availableBlood: {
       type: Map,
-      of: Number, // e.g., { "A+": 10, "O-": 5 }
+      of: Number,
+    },
+    dateOfBirth: {
+      type: Date,
+    },
+    emergencyContactName: {
+      type: String,
+    },
+    emergencyContactPhone: {
+      type: String,
+    },
+    currentMedication: {
+      type: String,
     },
   },
   {
@@ -35,5 +42,5 @@ const bloodBankSchema = new mongoose.Schema(
   }
 );
 
-export const BloodBank = mongoose.model("BloodBank", bloodBankSchema);
-module.exports = BloodBank;
+export const BloodBank = model<IBlodBank>("BloodBank", bloodBankSchema);
+

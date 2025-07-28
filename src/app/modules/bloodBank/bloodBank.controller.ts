@@ -9,11 +9,22 @@ const getAvailableBloodQuantity = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: StatusCodes.OK,
     success: true,
-    message: "Blood rr",
+    message: "Blood bank data retrieved successfully",
     data: { result },
+  });
+});
+
+const donateBlood = catchAsync(async (req, res) => {
+  const patientData = req.body;
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: "Donated successfully",
+    data: { patientData },
   });
 });
 
 export const BloodBankController = {
   getAvailableBloodQuantity,
+  donateBlood
 };

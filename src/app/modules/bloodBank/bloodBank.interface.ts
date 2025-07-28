@@ -8,7 +8,7 @@ export type IBloodGroup =
   | "O+"
   | "O-";
 
-interface IBlodBank {
+export interface IBlodBank {
   donorName: string;
   donorAddress: string;
   donorPhone: string;
