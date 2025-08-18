@@ -8,6 +8,11 @@ const healthPackageSchema = new Schema<IHealthPackage>(
       required: true,
       trim: true,
     },
+
+    durationInDays:{
+      type:Number,
+      default:60,
+    },
     price: {
       type: Number,
       required: true,

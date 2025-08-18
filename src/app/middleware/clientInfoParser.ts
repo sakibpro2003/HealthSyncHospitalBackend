@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import { UAParser } from 'ua-parser-js';
 
 const clientInfoParser = (req: Request, res: Response, next: NextFunction) => {

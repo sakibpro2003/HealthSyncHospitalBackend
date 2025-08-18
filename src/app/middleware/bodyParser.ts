@@ -1,7 +1,9 @@
 import { StatusCodes } from "http-status-codes";
-import AppError from "../../../../../../Course/PH/L2/SignatureMart/NextMart-Server/src/app/errors/appError";
-import catchAsync from "../../../../../../Course/PH/L2/SignatureMart/NextMart-Server/src/app/utils/catchAsync";
-import { NextFunction, Request, Response } from "express";
+// import AppError from "../../../../../../Course/PH/L2/SignatureMart/NextMart-Server/src/app/errors/appError";
+// import catchAsync from "../../../../../../Course/PH/L2/SignatureMart/NextMart-Server/src/app/utils/catchAsync";
+import type { NextFunction, Request, Response } from "express";
+import catchAsync from "../utils/catchAsync";
+import AppError from "../errors/appError";
 
 export const parseBody = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     if (!req.body.data) {

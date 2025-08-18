@@ -1,6 +1,6 @@
-import { NextFunction, Request, Response } from 'express';
-import { AnyZodObject } from 'zod';
-import catchAsync from '../../../../../../Course/PH/L2/SignatureMart/NextMart-Server/src/app/utils/catchAsync';
+import type { NextFunction, Request, Response } from 'express';
+import type { AnyZodObject } from 'zod';
+import catchAsync from '../utils/catchAsync';
 
 const validateRequest = (schema: AnyZodObject) => {
     return catchAsync(async (req: Request, res: Response, next: NextFunction) => {

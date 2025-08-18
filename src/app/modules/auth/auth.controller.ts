@@ -20,6 +20,7 @@ const loginUser = catchAsync(async (req, res) => {
     success: true,
     data: {
       //!dont return tokens
+      //TODO: data._id,data._name can be sent from here
       accessToken,
       refreshToken,
     },
