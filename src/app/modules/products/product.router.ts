@@ -1,6 +1,7 @@
-import express, {type  Request, type Response } from "express";
+import express, { type Request, type Response } from "express";
 import { productController } from "./product.controller";
 import upload from "../../middleware/multerConfig";
+import Cart from "../cart/cart.model";
 // import auth from "../../app/middlewares/auth";
 // import { USER_ROLE } from "../User/user.constant";
 // import upload from "../../app/middlewares/multerConfig";
@@ -15,7 +16,7 @@ router.post(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const { _id } = req.params;
-      console.log(_id,"id")
+      console.log(_id, "id");
 
       // Validate Cloudinary upload
       if (!req.file || !req.file.path) {
@@ -24,7 +25,7 @@ router.post(
       }
 
       const imageUrl = req.file.path; // Get Cloudinary image URL
-      console.log(imageUrl,"url")
+      console.log(imageUrl, "url");
 
       // Update product image in the database
       const updatedProduct = await Cart.findByIdAndUpdate(
@@ -51,10 +52,10 @@ router.post(
 router.post("/", productController.createProduct);
 router.get("/", productController.getProduct);
 router.get("/:productId", productController.getSingleProduct);
-router.put("/:productId",auth(USER_ROLE.ADMIN), productController.updateProduct);
+router.put("/:productId", productController.updateProduct);
 router.delete(
   "/:productId",
-  auth(USER_ROLE.ADMIN),
+  // auth(USER_ROLE.ADMIN),
   productController.deleteProduct
 );
 export const productRoutes = router;

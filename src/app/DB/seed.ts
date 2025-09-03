@@ -1,7 +1,9 @@
 // import bcrypt from 'bcrypt';
-import config from '../../../../../../Course/PH/L2/SignatureMart/NextMart-Server/src/app/config';
-import { UserRole } from '../../../../../../Course/PH/L2/SignatureMart/NextMart-Server/src/app/modules/user/user.interface';
-import User from '../../../../../../Course/PH/L2/SignatureMart/NextMart-Server/src/app/modules/user/user.model';
+// import config from '../../../../../../Course/PH/L2/SignatureMart/NextMart-Server/src/app/config';
+// import { UserRole } from '../../../../../../Course/PH/L2/SignatureMart/NextMart-Server/src/app/modules/user/user.interface';
+// import User from '../../../../../../Course/PH/L2/SignatureMart/NextMart-Server/src/app/modules/user/user.model';
+
+import { UserRole } from "../modules/user/user.interface";
 
 const adminUser = {
     email: 'admin@ph.com',

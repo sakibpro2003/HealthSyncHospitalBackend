@@ -73,7 +73,9 @@ const updateProduct = async (req: Request, res: Response): Promise<any> => {
     }
     const productId = req.params.productId;
     const data = req.body;
+    console.log(req.body,"req body")
     const result = await userService.updateProduct(productId, data);
+    console.log(data,"data update")
     res.json({
       message: "Bicycle updated successfully",
       data: result,

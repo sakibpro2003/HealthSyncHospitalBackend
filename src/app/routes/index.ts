@@ -10,6 +10,7 @@ import { BlogRoutes } from "../modules/blog/blog.route";
 import { BloodBankRoutes } from "../modules/bloodBank/bloodBank.route";
 import { HealthPackageRouter } from "../modules/healthPackage/healthPackage.route";
 import { SubscriptionRouter } from "../modules/subscription/subscription.route";
+import { productRoutes } from "../modules/products/product.router";
 
 const router = express.Router();
 const moduleRoutes = [
@@ -56,6 +57,10 @@ const moduleRoutes = [
   {
     path: "/subscription",
     route: SubscriptionRouter,
+  },
+  {
+    path: "/products",
+    route: productRoutes,
   },
 ];
 

@@ -2,6 +2,7 @@ import type { Model } from "mongoose";
 
 export enum UserRole {
   ADMIN = "admin",
+  USER = "user",
   RECEPTIONIST = "receptionist",
 }
 
