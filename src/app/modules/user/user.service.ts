@@ -20,6 +20,23 @@ const blockUserFromDB = async (userId) => {
   );
   return result;
 };
+const unblockUserFromDB = async (userId) => {
+  const result = await User.findByIdAndUpdate(
+    userId,
+    { isBlocked: false },
+    { new: true }
+  );
+  return result;
+};
+const updateRoleFromDB = async (userId, role: string) => {
+  const result = await User.findByIdAndUpdate(
+    userId,
+    { role },          // shorthand for { role: role }
+    { new: true }      // returns the updated document instead of the old one
+  );
+  return result;
+};
+
 
 const getAllUsersFromDB = async () => {
   const result = await User.find({}).select("-password").lean();
@@ -33,4 +50,5 @@ export const UserServices = {
   registerUser,
   getAllUsersFromDB,
   blockUserFromDB,
+  unblockUserFromDB,updateRoleFromDB
 };
