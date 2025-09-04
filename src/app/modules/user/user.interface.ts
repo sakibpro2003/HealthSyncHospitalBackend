@@ -27,6 +27,7 @@ export interface IUser {
   gender: string;
   dateOfBirth: Date;
   bloodGroup:string,
+  isBlocked: boolean;
   // clientInfo: {
   //   device: "pc" | "mobile"; // Device type
   //   browser: string; // Browser name

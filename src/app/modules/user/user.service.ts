@@ -12,6 +12,14 @@ const registerUser = async (userData: IUser) => {
   const result = await User.create(userData);
   return result;
 };
+const blockUserFromDB = async (userId) => {
+  const result = await User.findByIdAndUpdate(
+    userId,
+    { isBlocked: true },
+    { new: true }
+  );
+  return result;
+};
 
 const getAllUsersFromDB = async () => {
   const result = await User.find({}).select("-password").lean();
@@ -24,4 +32,5 @@ const getAllUsersFromDB = async () => {
 export const UserServices = {
   registerUser,
   getAllUsersFromDB,
+  blockUserFromDB,
 };

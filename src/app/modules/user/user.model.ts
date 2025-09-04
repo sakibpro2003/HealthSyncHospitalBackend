@@ -50,6 +50,10 @@ const userSchema = new Schema<IUser, UserModel>(
       enum: [UserRole.ADMIN, UserRole.RECEPTIONIST],
       default: UserRole.RECEPTIONIST,
     },
+    isBlocked:{
+      type: Boolean,
+      default: false,
+    }
     // hasShop: {
     //   type: Boolean,
     //   default: false,

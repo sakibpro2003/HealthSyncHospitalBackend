@@ -2,7 +2,6 @@ import { sendResponse } from "../../utils/sendResponse";
 import { StatusCodes } from "http-status-codes";
 import { UserServices } from "./user.service";
 import catchAsync from "../../utils/catchAsync";
-import { get } from "http";
 
 const registerUser = catchAsync(async (req, res) => {
   const userData = req.body;
@@ -11,6 +10,19 @@ const registerUser = catchAsync(async (req, res) => {
     statusCode: StatusCodes.OK,
     success: true,
     message: "User registration completed successfully",
+    data: {
+      result,
+    },
+  });
+});
+const blockUser = catchAsync(async (req, res) => {
+  // const userId = req.params;
+  // console.log(userId, "controller");
+  const result = await UserServices.blockUserFromDB(req.params.userId);
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: "User blocked",
     data: {
       result,
     },
@@ -32,4 +44,5 @@ const getAllUsers = catchAsync(async (req, res) => {
 export const UserController = {
   registerUser,
   getAllUsers,
+  blockUser
 };
