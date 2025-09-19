@@ -5,6 +5,7 @@ dotenv.config({ path: path.join((process.cwd(), ".env")) });
 
 export default {
   NODE_ENV: process.env.NODE_ENV,
+  next_base_url:process.env.NEXT_BASE_URL,
   port: process.env.PORT,
   db_url: process.env.DB_URL,
   bcrypt_salt_rounds: process.env.BCRYPT_SALT_ROUNDS,
@@ -25,25 +26,30 @@ export default {
   sender_email: process.env.SENDER_EMAIL,
   sender_app_password: process.env.SENDER_APP_PASS,
 
-  //todo: REMOVE THIS
-  ssl: {
-    store_name: process.env.STORE_NAME,
-    payment_api: process.env.PAYMENT_API,
-    validation_api: process.env.VALIDATION_API,
-    store_id: process.env.STORE_ID,
-    store_pass: process.env.STORE_PASSWORD,
-    validation_url: process.env.VALIDATION_URL,
-    success_url: process.env.SUCCESS_URL,
-    failed_url: process.env.FAILED_URL,
-    cancel_url: process.env.CANCEL_URL,
-  },
+  //stripe
+  stripe_secret_key:process.env.STRIPE_SECRET_KEY,
+  stripe:{
+  }
 
-  sp: {
-    sp_endpoint: process.env.SP_ENDPOINT,
-    sp_username: process.env.SP_USERNAME,
-    sp_password: process.env.SP_PASSWORD,
-    sp_prefix: process.env.SP_PREFIX,
-    sp_return_url: process.env.SP_RETURN_URL,
-    db_file: process.env.DB_FILE,
-  },
+  //todo: REMOVE THIS
+  // ssl: {
+  //   store_name: process.env.STORE_NAME,
+  //   payment_api: process.env.PAYMENT_API,
+  //   validation_api: process.env.VALIDATION_API,
+  //   store_id: process.env.STORE_ID,
+  //   store_pass: process.env.STORE_PASSWORD,
+  //   validation_url: process.env.VALIDATION_URL,
+  //   success_url: process.env.SUCCESS_URL,
+  //   failed_url: process.env.FAILED_URL,
+  //   cancel_url: process.env.CANCEL_URL,
+  // },
+
+  // sp: {
+  //   sp_endpoint: process.env.SP_ENDPOINT,
+  //   sp_username: process.env.SP_USERNAME,
+  //   sp_password: process.env.SP_PASSWORD,
+  //   sp_prefix: process.env.SP_PREFIX,
+  //   sp_return_url: process.env.SP_RETURN_URL,
+  //   db_file: process.env.DB_FILE,
+  // },
 };
