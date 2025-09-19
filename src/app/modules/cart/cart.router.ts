@@ -1,10 +1,7 @@
 import express from "express";
-// import auth from "../../app/middlewares/auth";
-// import { UserRole } from "../user/user.constant";
 import { cartController } from "./cart.controller";
 import auth from "../../middleware/auth";
 import { UserRole } from "../user/user.interface";
-// import { UserRole } from "../user/user.constant";
 
 const router = express.Router();
 
