@@ -27,8 +27,8 @@ export default {
   sender_app_password: process.env.SENDER_APP_PASS,
 
   //stripe
-  stripe_secret_key:process.env.STRIPE_SECRET_KEY,
   stripe:{
+    stripe_secret_key:process.env.STRIPE_SECRET_KEY,
   }
 
   //todo: REMOVE THIS

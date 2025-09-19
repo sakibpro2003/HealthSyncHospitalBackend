@@ -4,7 +4,7 @@ import { sendResponse } from "../../utils/sendResponse";
 import { PaymentService } from "./payment.service";
 
 const createPaymentC = catchAsync(async (req, res) => {
-  console.log(req.body, "🛒 cart received in controller");
+  // console.log(req.body, "🛒 cart received in controller");
 
   const sessionId = await PaymentService.createPayment(req.body);
 
