@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import Stripe from "stripe";
 import config from "../../config";
 import Payment from "./payment.model";
+import { subscriptionService } from "../subscription/subscription.service";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
   apiVersion: "2024-06-20",
@@ -183,23 +184,66 @@ export const confirmPayment = async (sessionId: string) => {
     throw new Error("Payment record not found");
   }
 
-  if (paymentRecord.status === "paid") {
-    return paymentRecord;
-  }
-
   const paymentIntent = session.payment_intent;
   const paymentIntentId =
     typeof paymentIntent === "string" ? paymentIntent : paymentIntent?.id;
 
-  paymentRecord.status = "paid";
-  paymentRecord.stripePaymentIntentId = paymentIntentId ?? undefined;
-  paymentRecord.amount = session.amount_total
-    ? session.amount_total / 100
-    : paymentRecord.amount;
-  paymentRecord.currency = session.currency ?? paymentRecord.currency;
-  paymentRecord.email =
-    session.customer_details?.email ?? paymentRecord.email ?? undefined;
-  paymentRecord.paidAt = new Date();
+  const metadataObject = (paymentRecord.metadata ?? {}) as Record<string, any>;
+
+  if (paymentRecord.status !== "paid") {
+    paymentRecord.status = "paid";
+    paymentRecord.stripePaymentIntentId = paymentIntentId ?? undefined;
+    paymentRecord.amount = session.amount_total
+      ? session.amount_total / 100
+      : paymentRecord.amount;
+    paymentRecord.currency = session.currency ?? paymentRecord.currency;
+    paymentRecord.email =
+      session.customer_details?.email ?? paymentRecord.email ?? undefined;
+    paymentRecord.paidAt = new Date();
+  }
+
+  const packageItems = paymentRecord.items.filter(
+    (item) => item.type === "package" && item.packageId
+  );
+
+  if (
+    packageItems.length &&
+    !metadataObject.subscriptionsCreated &&
+    paymentRecord.user
+  ) {
+    const userId = paymentRecord.user.toString();
+    const createdSubscriptions = [];
+
+    for (const item of packageItems) {
+      const packageId =
+        typeof item.packageId === "string"
+          ? item.packageId
+          : item.packageId?.toString();
+
+      if (!packageId) {
+        continue;
+      }
+
+      const subscription = await subscriptionService.createSubscription(
+        userId,
+        packageId,
+        false
+      );
+      createdSubscriptions.push(subscription._id.toString());
+    }
+
+    if (createdSubscriptions.length) {
+      metadataObject.subscriptionsCreated = true;
+      const existingIds = Array.isArray(metadataObject.subscriptionIds)
+        ? metadataObject.subscriptionIds
+        : [];
+      metadataObject.subscriptionIds = [
+        ...new Set([...existingIds, ...createdSubscriptions]),
+      ];
+      paymentRecord.metadata = metadataObject;
+      paymentRecord.markModified("metadata");
+    }
+  }
 
   await paymentRecord.save();
 
