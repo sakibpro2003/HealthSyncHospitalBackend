@@ -4,22 +4,34 @@ import mongoose, { Schema, type Types } from "mongoose";
 type PaymentItem = {
   productId?: Types.ObjectId;
   packageId?: Types.ObjectId;
+  doctorId?: Types.ObjectId;
+  appointmentDate?: Date;
+  appointmentTime?: string;
+  reason?: string;
   title: string;
   quantity: number;
   price: number;
   image?: string;
-  type: "product" | "package";
+  type: "product" | "package" | "appointment";
 };
 
 const paymentItemSchema = new Schema<PaymentItem>(
   {
     productId: { type: Schema.Types.ObjectId, ref: "Product" },
     packageId: { type: Schema.Types.ObjectId, ref: "HealthPackage" },
+    doctorId: { type: Schema.Types.ObjectId, ref: "Doctor" },
+    appointmentDate: { type: Date },
+    appointmentTime: { type: String },
+    reason: { type: String },
     title: { type: String, required: true },
     quantity: { type: Number, required: true, min: 1 },
     price: { type: Number, required: true, min: 0 },
     image: { type: String },
-    type: { type: String, enum: ["product", "package"], required: true },
+    type: {
+      type: String,
+      enum: ["product", "package", "appointment"],
+      required: true,
+    },
   },
   { _id: false }
 );

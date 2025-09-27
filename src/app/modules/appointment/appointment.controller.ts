@@ -2,15 +2,40 @@ import { StatusCodes } from "http-status-codes";
 import catchAsync from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { appointmentService } from "./appointment.service";
+import { PaymentService } from "../payment/payment.service";
 
-const createAppointment = catchAsync(async (req, res) => {
-  const result = await appointmentService.createAppointment(req.body);
+const initiateAppointmentCheckout = catchAsync(async (req, res) => {
+  const prepared = await appointmentService.prepareAppointmentCheckout(req.body);
+
+  const sessionId = await PaymentService.createPayment({
+    userId: prepared.patientId,
+    email: prepared.patientEmail,
+    items: [
+      {
+        type: "appointment",
+        doctorId: prepared.doctor._id.toString(),
+        title: `Consultation with ${prepared.doctor.name}`,
+        price: prepared.doctor.consultationFee,
+        quantity: 1,
+        appointmentDate: prepared.appointmentDate.toISOString(),
+        appointmentTime: prepared.appointmentTime,
+        reason: prepared.reason,
+      },
+    ],
+    metadata: {
+      bookingType: "appointment",
+      doctorId: prepared.doctor._id.toString(),
+      appointmentDate: prepared.appointmentDate.toISOString(),
+      appointmentTime: prepared.appointmentTime,
+      reason: prepared.reason,
+    },
+  });
 
   sendResponse(res, {
-    statusCode: StatusCodes.CREATED,
+    statusCode: StatusCodes.OK,
     success: true,
-    message: "Appointment booked successfully",
-    data: result,
+    message: "Checkout session created successfully",
+    data: { id: sessionId },
   });
 });
 
@@ -27,6 +52,6 @@ const getAppointmentsByPatient = catchAsync(async (req, res) => {
 });
 
 export const appointmentController = {
-  createAppointment,
+  initiateAppointmentCheckout,
   getAppointmentsByPatient,
 };

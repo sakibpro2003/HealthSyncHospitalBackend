@@ -18,4 +18,5 @@ export type CreateAppointmentPayload = {
   appointmentDate: string;
   appointmentTime: string;
   reason?: string;
+  patientEmail?: string;
 };
