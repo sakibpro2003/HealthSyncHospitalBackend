@@ -107,7 +107,7 @@ export const createPayment = async (
     user: userObjectId,
     email,
     amount,
-    currency: "usd",
+    currency: "bdt",
     status: "pending",
     items: items.map((item) => ({
       ...item,
@@ -121,7 +121,7 @@ export const createPayment = async (
 
   const line_items = items.map((item) => {
     const priceData: Stripe.Checkout.SessionCreateParams.LineItem.PriceData = {
-      currency: "usd",
+      currency: "bdt",
       product_data: {
         name: item.title,
       },

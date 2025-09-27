@@ -39,7 +39,7 @@ const paymentSchema = new Schema(
     },
     currency: {
       type: String,
-      default: "usd",
+      default: "bdt",
     },
     status: {
       type: String,
