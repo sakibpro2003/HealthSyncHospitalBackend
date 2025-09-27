@@ -1,63 +1,71 @@
-// // src/modules/payment/payment.model.ts
-// import { Schema, model } from "mongoose";
-// import type { IPayment } from "./payment.interface";
 
-// const PaymentSchema = new Schema<IPayment>(
-//   {
-//     orderId: { type: String, required: true, index: true },
-//     userId: { type: String },
-//     tranId: { type: String, required: true, unique: true, index: true },
-//     amount: { type: Number, required: true },
-//     currency: { type: String, default: "BDT" },
-//     status: {
-//       type: String,
-//       enum: ["INITIATED", "PENDING", "VALIDATED", "FAILED", "CANCELLED"],
-//       default: "INITIATED",
-//       index: true,
-//     },
-//     sessionKey: { type: String },
-//     valId: { type: String },
-//     cardType: { type: String },
-//     storeId: { type: String },
-//     riskTitle: { type: String },
-//     gatewayResponse: { type: Schema.Types.Mixed },
-//     paidAt: { type: Date },
-//   },
-//   { timestamps: true }
-// );
+import mongoose, { Schema, type Types } from "mongoose";
 
-// export const PaymentModel = model<IPayment>("Payment", PaymentSchema);
+type PaymentItem = {
+  productId?: Types.ObjectId;
+  packageId?: Types.ObjectId;
+  title: string;
+  quantity: number;
+  price: number;
+  image?: string;
+  type: "product" | "package";
+};
 
-
-import mongoose from "mongoose";
-
-const paymentSchema = new mongoose.Schema(
+const paymentItemSchema = new Schema<PaymentItem>(
   {
+    productId: { type: Schema.Types.ObjectId, ref: "Product" },
+    packageId: { type: Schema.Types.ObjectId, ref: "HealthPackage" },
+    title: { type: String, required: true },
+    quantity: { type: Number, required: true, min: 1 },
+    price: { type: Number, required: true, min: 0 },
+    image: { type: String },
+    type: { type: String, enum: ["product", "package"], required: true },
+  },
+  { _id: false }
+);
+
+const paymentSchema = new Schema(
+  {
+    user: { type: Schema.Types.ObjectId, ref: "User", required: true },
     email: {
       type: String,
-      required: true,
       trim: true,
       lowercase: true,
     },
-    price: {
+    amount: {
       type: Number,
       required: true,
       min: 0,
     },
-    transactionId: {
-      type: String, // better to use String (UUID, Stripe ID, etc.)
-      required: true,
+    currency: {
+      type: String,
+      default: "usd",
+    },
+    status: {
+      type: String,
+      enum: ["pending", "paid", "failed"],
+      default: "pending",
+    },
+    stripeSessionId: {
+      type: String,
       unique: true,
+      sparse: true,
     },
-    date: {
+    stripePaymentIntentId: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
+    items: {
+      type: [paymentItemSchema],
+      default: [],
+    },
+    metadata: {
+      type: Schema.Types.Mixed,
+    },
+    paidAt: {
       type: Date,
-      default: Date.now,
     },
-    // status: {
-    //   type: String,
-    //   enum: ["pending", "completed", "failed"],
-    //   default: "pending",
-    // },
   },
   { timestamps: true }
 );
