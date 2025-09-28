@@ -1,9 +1,11 @@
 import { StatusCodes } from "http-status-codes";
+import mongoose from "mongoose";
 import AppError from "../../errors/appError";
 import type { IPatient } from "./patient.interface";
 import { Patient } from "./patient.model";
 import { QueryBuilder } from "../../builder/QueryBuilder";
 import { searchableFields } from "./patient.constants";
+import { User } from "../user/user.model";
 
 const registerPatient = async (patientPayload: IPatient) => {
   const result = await Patient.create(patientPayload);
@@ -11,19 +13,59 @@ const registerPatient = async (patientPayload: IPatient) => {
 };
 
 const updatePatient = async (id: string, patientPayload: Partial<IPatient>) => {
-  const patient = await Patient.findByIdAndUpdate(
-    { _id: id, patientPayload },
-    { new: true }
-  );
-  if (!patient) {
+  const updated = await Patient.findByIdAndUpdate(id, patientPayload, {
+    new: true,
+    runValidators: true,
+  });
+
+  if (!updated) {
     throw new AppError(StatusCodes.NOT_FOUND, "Patient not found!");
   }
-  const result = await Patient.findByIdAndUpdate(
-    patientPayload._id,
-    patientPayload,
-    { new: true }
-  );
-  return result;
+
+  return updated;
+};
+
+const updateMedicalHistory = async (
+  id: string,
+  payload: Partial<
+    Pick<IPatient, "medicalHistory" | "allergies" | "currentMedications">
+  > & { email?: string }
+) => {
+  const updateData: Record<string, unknown> = {};
+
+  if (payload.medicalHistory) {
+    updateData.medicalHistory = payload.medicalHistory;
+  }
+  if (payload.allergies) {
+    updateData.allergies = payload.allergies;
+  }
+  if (payload.currentMedications) {
+    updateData.currentMedications = payload.currentMedications;
+  }
+
+  let updated: IPatient | null = null;
+
+  if (mongoose.Types.ObjectId.isValid(id)) {
+    updated = await Patient.findByIdAndUpdate(
+      id,
+      { $set: updateData },
+      { new: true, runValidators: true }
+    );
+  }
+
+  if (!updated && payload.email) {
+    updated = await Patient.findOneAndUpdate(
+      { email: payload.email },
+      { $set: updateData },
+      { new: true, runValidators: true }
+    );
+  }
+
+  if (!updated) {
+    throw new AppError(StatusCodes.NOT_FOUND, "Patient not found!");
+  }
+
+  return updated;
 };
 
 const deletePatient = async (_id: string) => {
@@ -35,8 +77,20 @@ const deletePatient = async (_id: string) => {
   return result;
 };
 
-const getSinglePatient = async (_id: string) => {
-  const result = await Patient.findById(_id);
+const getSinglePatient = async (id: string) => {
+  let result: IPatient | null = null;
+
+  if (mongoose.Types.ObjectId.isValid(id)) {
+    result = await Patient.findById(id);
+  }
+
+  if (!result) {
+    const user = await User.findById(id);
+    if (user?.email) {
+      result = await Patient.findOne({ email: user.email });
+    }
+  }
+
   if (!result) {
     throw new AppError(StatusCodes.NOT_FOUND, "Patient not found");
   }
@@ -44,52 +98,6 @@ const getSinglePatient = async (_id: string) => {
 };
 
 const getAllPatient = async (query: Record<string, unknown>) => {
-  // let searchTerm = "";
-  // const queryObj = { ...query };
-
-  // if (query?.searchTerm) {
-  //   searchTerm = query.searchTerm as string;
-  // }
-
-  // const searchQuery = Patient.find({
-  //   $or: searchableFields.map((field) => ({
-  //     [field]: { $regex: searchTerm, $options: "i" },
-  //   })),
-  // });
-
-  // const excludeFields = ["searchTerm", "sort", "limit", "page", "fields"];
-  // excludeFields.forEach((el) => delete queryObj[el]);
-  // const filterQuery = searchQuery.find(queryObj);
-  // let sort = "-createdAt";
-  // if (query.sort) {
-  //   sort = query.sort as string;
-  // }
-
-  // const sortQuery = filterQuery.sort(sort);
-  // let page = 1;
-  // if (query.page) {
-  //   page = query.page as number;
-  // }
-  // let limit = 10;
-  // let skip = 0;
-  // if (query.limit) {
-  //   limit = query.limit as number;
-  // }
-
-  // if (query.page) {
-  //   page = query.page as number;
-  //   skip = (page - 1) * limit;
-  // }
-  // const paginateQuery = sortQuery.skip(skip);
-  // const limitQuery = paginateQuery.limit(limit);
-  // let fields = "-__v";
-  // if (query.fields) {
-  //   fields = (query.fields as string).split(",").join(" ");
-  // }
-
-  // const result = await limitQuery.select(fields);
-  // return result;
-
   const patientQuery = new QueryBuilder(Patient.find(), query)
     .search(searchableFields)
     .filter()
@@ -106,6 +114,7 @@ export const PatientService = {
   registerPatient,
   deletePatient,
   updatePatient,
+  updateMedicalHistory,
   getAllPatient,
   getSinglePatient,
 };

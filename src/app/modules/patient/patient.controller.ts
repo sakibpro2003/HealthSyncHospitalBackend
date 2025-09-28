@@ -30,6 +30,26 @@ const updatePatient = catchAsync(async (req, res) => {
     },
   });
 });
+
+const updateMedicalHistory = catchAsync(async (req, res) => {
+  const id = req.params.id;
+  if (!id && !req.body.email) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      "Patient identifier is required"
+    );
+  }
+
+  const result = await PatientService.updateMedicalHistory(id, req.body);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: "Medical history updated successfully",
+    data: { result },
+  });
+});
+
 const deletePatient = catchAsync(async (req, res) => {
   const result = await PatientService.deletePatient(req.body);
   sendResponse(res, {
@@ -52,7 +72,6 @@ const getAllPatient = catchAsync(async (req, res) => {
 });
 
 const getSinglePatient = catchAsync(async (req, res) => {
-  console.log(req.params, "params sdkdsksdkl");
   const id = req.params.id;
   if (!id) {
     throw new AppError(StatusCodes.BAD_REQUEST, "Patient ID is required");
@@ -70,6 +89,7 @@ export const PatientController = {
   registerPatient,
   deletePatient,
   updatePatient,
+  updateMedicalHistory,
   getAllPatient,
   getSinglePatient,
 };
