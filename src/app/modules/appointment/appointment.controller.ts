@@ -51,7 +51,42 @@ const getAppointmentsByPatient = catchAsync(async (req, res) => {
   });
 });
 
+const cancelAppointment = catchAsync(async (req, res) => {
+  const { appointmentId } = req.params;
+  const { patientId } = req.body;
+
+  const result = await appointmentService.cancelAppointment(
+    appointmentId,
+    patientId
+  );
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: "Appointment cancelled successfully",
+    data: result,
+  });
+});
+
+const rescheduleAppointment = catchAsync(async (req, res) => {
+  const { appointmentId } = req.params;
+
+  const result = await appointmentService.rescheduleAppointment(
+    appointmentId,
+    req.body
+  );
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: "Appointment rescheduled successfully",
+    data: result,
+  });
+});
+
 export const appointmentController = {
   initiateAppointmentCheckout,
   getAppointmentsByPatient,
+  cancelAppointment,
+  rescheduleAppointment,
 };
