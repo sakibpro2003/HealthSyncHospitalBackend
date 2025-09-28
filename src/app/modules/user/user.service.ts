@@ -4,6 +4,7 @@ import { User } from "./user.model";
 import type { IUser } from "./user.interface";
 import { QueryBuilder } from "../../builder/QueryBuilder";
 import { searchableFields } from "./user.utils";
+import { Doctor } from "../doctor/doctor.model";
 
 const registerUser = async (userData: IUser) => {
   const { name, email, password, role, phone } = userData;
@@ -64,6 +65,51 @@ const sanitiseQuery = (query: Record<string, unknown>) => {
   return cleaned;
 };
 
+
+const getRoleMetrics = async () => {
+  const aggregation = await User.aggregate([
+    {
+      $group: {
+        _id: { role: "$role", isBlocked: "$isBlocked" },
+        count: { $sum: 1 },
+      },
+    },
+  ]);
+
+  const summary: Record<string, { active: number; blocked: number }> = {};
+
+  aggregation.forEach((entry) => {
+    const role = entry?._id?.role ?? "unknown";
+    const isBlocked = entry?._id?.isBlocked ?? false;
+    const count = entry?.count ?? 0;
+    if (!summary[role]) {
+      summary[role] = { active: 0, blocked: 0 };
+    }
+    if (isBlocked) {
+      summary[role].blocked += count;
+    } else {
+      summary[role].active += count;
+    }
+  });
+
+  const doctorCount = await Doctor.countDocuments();
+  if (!summary.doctor) {
+    summary.doctor = { active: 0, blocked: 0 };
+  }
+  summary.doctor.active += doctorCount;
+
+  const totals = Object.values(summary).reduce(
+    (acc, curr) => {
+      acc.active += curr.active;
+      acc.blocked += curr.blocked;
+      return acc;
+    },
+    { active: 0, blocked: 0 }
+  );
+
+  return { summary, totals };
+};
+
 const getAllUsersFromDB = async (query: Record<string, unknown>) => {
   const cleanedQuery = sanitiseQuery(query);
 
@@ -83,6 +129,7 @@ const getAllUsersFromDB = async (query: Record<string, unknown>) => {
 export const UserServices = {
   registerUser,
   getAllUsersFromDB,
+  getRoleMetrics,
   blockUserFromDB,
   unblockUserFromDB,updateRoleFromDB
 };

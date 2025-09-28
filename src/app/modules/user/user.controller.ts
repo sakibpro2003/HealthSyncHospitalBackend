@@ -56,6 +56,16 @@ const updateRole = catchAsync(async (req, res) => {
   });
 });
 
+const getRoleMetrics = catchAsync(async (req, res) => {
+  const result = await UserServices.getRoleMetrics();
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: "Role metrics retrieved successfully",
+    data: result,
+  });
+});
+
 const getAllUsers = catchAsync(async (req, res) => {
   const result = await UserServices.getAllUsersFromDB(req.query);
   sendResponse(res, {
@@ -70,5 +80,6 @@ const getAllUsers = catchAsync(async (req, res) => {
 export const UserController = {
   registerUser,
   getAllUsers,
+  getRoleMetrics,
   blockUser,unblockUser,updateRole
 };
