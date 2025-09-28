@@ -1,5 +1,1 @@
-// import { Schema } from "mongoose";
-
-// const userSchema = new Schema({
-    
-// })
+export const searchableFields = ["name", "email", "phone"];
