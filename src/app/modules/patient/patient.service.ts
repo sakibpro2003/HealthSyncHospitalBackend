@@ -98,7 +98,36 @@ const getSinglePatient = async (id: string) => {
 };
 
 const getAllPatient = async (query: Record<string, unknown>) => {
-  const patientQuery = new QueryBuilder(Patient.find(), query)
+  const sanitisedQuery: Record<string, unknown> = {};
+
+  Object.entries(query ?? {}).forEach(([key, value]) => {
+    if (value === undefined || value === null) {
+      return;
+    }
+
+    if (typeof value === "string") {
+      const trimmed = value.trim();
+      if (trimmed === "" && key !== "searchTerm") {
+        return;
+      }
+      if (trimmed.toLowerCase() === "null" || trimmed.toLowerCase() === "undefined") {
+        return;
+      }
+      if (key === "page" || key === "limit") {
+        const numeric = Number(trimmed);
+        if (!Number.isNaN(numeric) && numeric > 0) {
+          sanitisedQuery[key] = numeric;
+        }
+        return;
+      }
+      sanitisedQuery[key] = trimmed;
+      return;
+    }
+
+    sanitisedQuery[key] = value;
+  });
+
+  const patientQuery = new QueryBuilder(Patient.find(), sanitisedQuery)
     .search(searchableFields)
     .filter()
     .sort()
