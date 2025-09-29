@@ -14,8 +14,6 @@ import { productRoutes } from "../modules/products/product.router";
 import { PaymentRouter } from "../modules/payment/payment.route";
 import { AdminDashboardRoutes } from "../modules/adminDashboard/adminDashboard.route";
 import { AppointmentRouter } from "../modules/appointment/appointment.route";
-// import { PaymentRouter } from "../modules/payment/payment.route";
-import { AdminDashboardRoutes } from "../modules/adminDashboard/adminDashboard.route";
 
 const router = express.Router();
 const moduleRoutes = [
@@ -46,10 +44,6 @@ const moduleRoutes = [
   {
     path: "/blog",
     route: BlogRoutes,
-  },
-  {
-    path: "/blood-bank",
-    route: BloodBankRoutes,
   },
   {
     path: "/blood-bank",

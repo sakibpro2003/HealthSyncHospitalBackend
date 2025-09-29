@@ -1,6 +1,6 @@
 import Payment from "../payment/payment.model";
-import { Donor } from "../donor/donor.model";
 import { Doctor } from "../doctor/doctor.model";
+import { BloodInventory } from "../bloodBank/bloodBank.model";
 
 const calculateSalesBreakdown = async () => {
   const baseMatch = { status: "paid" };
@@ -141,32 +141,50 @@ const calculateSalesBreakdown = async () => {
 };
 
 const getDonationHistory = async () => {
-  const totalsByGroup = await Donor.aggregate([
-    {
-      $group: {
-        _id: "$bloodGroup",
-        totalQuantity: { $sum: "$quantity" },
-        donors: { $sum: 1 },
-        lastDonation: { $max: "$lastDonationDate" },
-      },
-    },
-    { $sort: { _id: 1 } },
-    {
-      $project: {
-        _id: 0,
-        bloodGroup: "$_id",
-        totalQuantity: 1,
-        donors: 1,
-        lastDonation: 1,
-      },
-    },
-  ]);
-
-  const recentDonations = await Donor.find()
-    .select("name bloodGroup quantity lastDonationDate createdAt")
-    .sort({ lastDonationDate: -1, createdAt: -1 })
-    .limit(10)
+  const inventories = await BloodInventory.find()
+    .select("bloodGroup unitsAvailable history updatedAt")
     .lean();
+
+  const totalsByGroup = inventories.map((inventory) => {
+    const donationEvents = (inventory.history ?? []).filter(
+      (entry) => entry.change > 0
+    );
+
+    const lastDonation = donationEvents
+      .slice()
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt ?? 0).getTime() -
+          new Date(a.createdAt ?? 0).getTime()
+      )[0];
+
+    return {
+      bloodGroup: inventory.bloodGroup,
+      totalQuantity: inventory.unitsAvailable,
+      donors: donationEvents.length,
+      lastDonation: lastDonation?.createdAt ?? null,
+    };
+  });
+
+  const recentDonations = inventories
+    .flatMap((inventory) =>
+      (inventory.history ?? [])
+        .filter((entry) => entry.change > 0)
+        .map((entry) => ({
+          _id: entry._id?.toString() ?? `${inventory._id}-${entry.createdAt}`,
+          name: entry.actorName ?? "Anonymous",
+          bloodGroup: inventory.bloodGroup,
+          quantity: entry.change,
+          lastDonationDate: entry.createdAt,
+          createdAt: entry.createdAt ?? inventory.updatedAt ?? new Date(),
+        }))
+    )
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt ?? 0).getTime() -
+        new Date(a.createdAt ?? 0).getTime()
+    )
+    .slice(0, 10);
 
   return {
     totalsByGroup,
