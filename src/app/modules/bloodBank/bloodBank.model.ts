@@ -87,8 +87,6 @@ const bloodInventorySchema = new Schema<IBloodInventory>(
   }
 );
 
-bloodInventorySchema.index({ bloodGroup: 1 });
-
 const bloodRequestSchema = new Schema<IBloodRequest>(
   {
     bloodGroup: {
