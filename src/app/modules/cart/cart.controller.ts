@@ -1,37 +1,62 @@
 import type { Request, Response } from "express";
 import httpStatus from "http-status";
-// import catchAsync from "../../app/utils/catchAsync";
-// import { User } from "../User/user.model";
+import mongoose from "mongoose";
+
 import { cartServices } from "./cart.service";
-import mongoose, { type ObjectId } from "mongoose";
 import Cart from "./cart.model";
 import Product from "../products/product.model";
 import catchAsync from "../../utils/catchAsync";
 import { User } from "../user/user.model";
 import AppError from "../../errors/appError";
-// import AppError from "../../app/error/AppError";
+
+const resolveAuthenticatedUser = async (req: Request) => {
+  const email = req.user?.email;
+
+  if (!email) {
+    throw new AppError(
+      httpStatus.UNAUTHORIZED,
+      "Unauthorized: User identifier missing in token."
+    );
+  }
+
+  const userDoc = await User.findOne({ email }).select({ _id: 1 });
+  if (!userDoc?._id) {
+    throw new AppError(httpStatus.NOT_FOUND, "User not found");
+  }
+
+  return new mongoose.Types.ObjectId(
+    userDoc._id as mongoose.Types.ObjectId | string
+  );
+};
+
+const parseObjectId = (value: string | undefined, message: string) => {
+  if (!value || !mongoose.Types.ObjectId.isValid(value)) {
+    throw new AppError(httpStatus.BAD_REQUEST, message);
+  }
+  return new mongoose.Types.ObjectId(value);
+};
 
 const addToCart = catchAsync(async (req: Request, res: Response) => {
-  if (!req.user) {
-    return res.status(httpStatus.UNAUTHORIZED).json({
-      success: false,
-      message: "Unauthorized: User ID not found in token.",
-    });
-  }
-  const email = req.user.email;
-  const getUser = await User.findOne({ email: email });
-  const user = getUser?._id as unknown as ObjectId;
-  const findCart = await Cart.findOne({ user });
+  const userObjectId = await resolveAuthenticatedUser(req);
 
-  const payload = req.body;
-  const { product } = payload;
-  //TODO: add quantity to creaat cart item. then update cart increase
-  const findProduct = await Cart.findOne({ product, user });
-  if (findProduct?._id) {
-    throw new AppError(httpStatus.CONFLICT, "Product already added");
+  const payload = req.body as { product?: string } & Record<string, unknown>;
+  if (!payload.product) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Product identifier is required");
   }
 
-  const addItemToCart = await cartServices.addToCart({ payload, user });
+  const existing = await Cart.findOne({
+    user: userObjectId,
+    product: payload.product,
+  });
+
+  if (existing?._id) {
+    throw new AppError(httpStatus.CONFLICT, "Product already added to cart");
+  }
+
+  const addItemToCart = await cartServices.addToCart({
+    payload,
+    user: userObjectId,
+  });
 
   return res.status(httpStatus.CREATED).json({
     success: true,
@@ -41,54 +66,24 @@ const addToCart = catchAsync(async (req: Request, res: Response) => {
 });
 
 const increaseAmount = catchAsync(async (req: Request, res: Response) => {
-  if (!req.user) {
-    return res.status(httpStatus.UNAUTHORIZED).json({
-      success: false,
-      message: "Unauthorized: User ID not found in token.",
-    });
-  }
+  const userId = await resolveAuthenticatedUser(req);
+  const productId = parseObjectId(
+    req.params?.productId,
+    "Invalid product ID format."
+  );
 
-  const { productId } = req.params;
-
-  if (!mongoose.Types.ObjectId.isValid(productId)) {
-    return res.status(httpStatus.BAD_REQUEST).json({
-      success: false,
-      message: "Invalid product ID format.",
-    });
-  }
-
-  const email = req.user.email;
-  const getUser = await User.findOne({ email });
-
-  if (!getUser) {
-    return res.status(httpStatus.NOT_FOUND).json({
-      success: false,
-      message: "User not found",
-    });
-  }
-
-  const userId = getUser._id;
-
-  const objectProductId = new mongoose.Types.ObjectId(productId);
-  const product = await Product.findById(objectProductId);
-
+  const product = await Product.findById(productId);
   if (!product) {
-    return res.status(httpStatus.NOT_FOUND).json({
-      success: false,
-      message: "Product not found in the database",
-    });
+    throw new AppError(httpStatus.NOT_FOUND, "Product not found in the database");
   }
 
   const updatedCart = await cartServices.increaseAmountIntoDb({
     userId,
-    objectProductId,
+    objectProductId: productId,
   });
 
   if (!updatedCart) {
-    return res.status(httpStatus.NOT_FOUND).json({
-      success: false,
-      message: "Cart item not found",
-    });
+    throw new AppError(httpStatus.NOT_FOUND, "Cart item not found");
   }
 
   return res.status(httpStatus.OK).json({
@@ -97,87 +92,50 @@ const increaseAmount = catchAsync(async (req: Request, res: Response) => {
     data: updatedCart,
   });
 });
+
 const decreaseAmount = catchAsync(async (req: Request, res: Response) => {
-  if (!req.user) {
-    return res.status(httpStatus.UNAUTHORIZED).json({
-      success: false,
-      message: "Unauthorized: User ID not found in token.",
-    });
-  }
+  const userId = await resolveAuthenticatedUser(req);
+  const productId = parseObjectId(
+    req.params?.productId,
+    "Invalid product ID format."
+  );
 
-  const { productId } = req.params;
-
-  if (!mongoose.Types.ObjectId.isValid(productId)) {
-    return res.status(httpStatus.BAD_REQUEST).json({
-      success: false,
-      message: "Invalid product ID format.",
-    });
-  }
-
-  const email = req.user.email;
-  const getUser = await User.findOne({ email });
-
-  if (!getUser) {
-    return res.status(httpStatus.NOT_FOUND).json({
-      success: false,
-      message: "User not found",
-    });
-  }
-
-  const userId = getUser._id;
-
-  // Convert to ObjectId
-  const objectProductId = new mongoose.Types.ObjectId(productId);
-  const product = await Product.findById(objectProductId);
-
+  const product = await Product.findById(productId);
   if (!product) {
-    return res.status(httpStatus.NOT_FOUND).json({
-      success: false,
-      message: "Product not found in the database",
-    });
+    throw new AppError(httpStatus.NOT_FOUND, "Product not found in the database");
   }
 
   const updatedCart = await cartServices.decreaseAmountIntoDb({
     userId,
-    objectProductId,
+    objectProductId: productId,
   });
 
   if (!updatedCart) {
-    return res.status(httpStatus.NOT_FOUND).json({
-      success: false,
-      message: "Cart item not found",
-    });
+    throw new AppError(httpStatus.NOT_FOUND, "Cart item not found");
   }
 
   return res.status(httpStatus.OK).json({
     success: true,
-    message: "Quantity increased successfully!",
+    message: "Quantity decreased successfully!",
     data: updatedCart,
   });
 });
 
 const clearCart = catchAsync(async (req: Request, res: Response) => {
   const userEmail = req.user?.email;
-
   if (!userEmail) {
-    return res.status(httpStatus.UNAUTHORIZED).json({
-      success: false,
-      message: "Unauthorized: User email not found.",
-    });
+    throw new AppError(
+      httpStatus.UNAUTHORIZED,
+      "Unauthorized: User email not found."
+    );
   }
 
-  const user = await User.findOne({ email: userEmail });
-
-  if (!user || !user._id) {
-    return res.status(httpStatus.NOT_FOUND).json({
-      success: false,
-      message: "User not found!",
-    });
+  const user = await User.findOne({ email: userEmail }).select({ _id: 1 });
+  if (!user?._id) {
+    throw new AppError(httpStatus.NOT_FOUND, "User not found");
   }
 
-  const userId = user._id.toString();
-
-  const response = await cartServices.clearCart(userId);
+  const response = await cartServices.clearCart(user._id.toString());
 
   return res.status(httpStatus.OK).json({
     success: true,
@@ -186,39 +144,32 @@ const clearCart = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const getAllProductsFromCart = catchAsync(
-  async (req: Request, res: Response) => {
-    if (!req.user) {
-      return res.status(httpStatus.UNAUTHORIZED).json({
-        success: false,
-        message: "Unauthorized: User ID not found in token.",
-      });
-    }
-    const email = req.user.email;
-    const getUser = await User.findOne({ email: email });
-    const userId = getUser?._id as any;
-    const cartProducts = await cartServices.getAllProductsFromCartService(userId);
-    return res.status(httpStatus.OK).json({
-      success: true,
-      message: "Orders retrieved successfully!",
-      data: cartProducts,
-    });
-  }
-);
+const getAllProductsFromCart = catchAsync(async (req: Request, res: Response) => {
+  const userId = await resolveAuthenticatedUser(req);
+
+  const cartProducts = await cartServices.getAllProductsFromCartService({
+    _id: userId,
+  });
+
+  return res.status(httpStatus.OK).json({
+    success: true,
+    message: "Orders retrieved successfully!",
+    data: cartProducts,
+  });
+});
 
 const removeItemController = catchAsync(async (req: Request, res: Response) => {
-  if (!req.user) {
-    return res.status(httpStatus.UNAUTHORIZED).json({
-      success: false,
-      message: "Unauthorized: User ID not found in token.",
-    });
-  }
-  const { productId } = req.params;
-  const email = req.user.email;
-  const getUser = await User.findOne({ email: email });
-  const user = getUser?._id as any;
+  const userId = await resolveAuthenticatedUser(req);
+  const productId = req.params?.productId;
 
-  const result = await cartServices.removeItemFromCartDb(productId, user);
+  if (!productId) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Product ID is required.");
+  }
+
+  const result = await cartServices.removeItemFromCartDb(productId, {
+    _id: userId,
+  });
+
   return res.status(httpStatus.OK).json({
     success: true,
     message: "Item removed successfully!",

@@ -98,7 +98,14 @@ const prepareAppointmentCheckout = async (
     throw new Error("Appointments can only be booked between 08:00 and 22:00");
   }
 
-  await ensureSlotAvailable(doctorRecord._id, parsedDate, normalisedTime);
+  const doctorObjectId =
+    doctorRecord._id instanceof mongoose.Types.ObjectId
+      ? doctorRecord._id
+      : new mongoose.Types.ObjectId(
+          (doctorRecord._id as mongoose.Types.ObjectId | string).toString()
+        );
+
+  await ensureSlotAvailable(doctorObjectId, parsedDate, normalisedTime);
 
   return {
     patientId: patient,
@@ -233,11 +240,18 @@ const rescheduleAppointment = async (
           (appointment.doctor as mongoose.Types.ObjectId | string).toString()
         );
 
+  const appointmentObjectId =
+    appointment._id instanceof mongoose.Types.ObjectId
+      ? appointment._id
+      : new mongoose.Types.ObjectId(
+          (appointment._id as mongoose.Types.ObjectId | string).toString()
+        );
+
   await ensureSlotAvailable(
     doctorObjectId,
     parsedDate,
     normalisedTime,
-    appointment._id
+    appointmentObjectId
   );
 
   appointment.appointmentDate = parsedDate;

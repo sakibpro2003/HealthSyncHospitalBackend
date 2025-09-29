@@ -2,6 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import catchAsync from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { BloodBankService } from "./bloodBank.service";
+import AppError from "../../errors/appError";
 
 const getAvailableBloodQuantity = catchAsync(async (req, res) => {
   const result = await BloodBankService.getInventorySummary();
@@ -34,7 +35,10 @@ const createInventory = catchAsync(async (req, res) => {
 });
 
 const updateInventory = catchAsync(async (req, res) => {
-  const { id } = req.params;
+  const { id } = req.params as { id?: string };
+  if (!id) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "Inventory id is required");
+  }
   const result = await BloodBankService.updateInventory(id, req.body);
   sendResponse(res, {
     statusCode: StatusCodes.OK,
@@ -55,7 +59,10 @@ const adjustInventory = catchAsync(async (req, res) => {
 });
 
 const deleteInventory = catchAsync(async (req, res) => {
-  const { id } = req.params;
+  const { id } = req.params as { id?: string };
+  if (!id) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "Inventory id is required");
+  }
   const result = await BloodBankService.deleteInventory(id);
   sendResponse(res, {
     statusCode: StatusCodes.OK,
@@ -86,7 +93,10 @@ const listBloodRequests = catchAsync(async (req, res) => {
 });
 
 const updateBloodRequestStatus = catchAsync(async (req, res) => {
-  const { id } = req.params;
+  const { id } = req.params as { id?: string };
+  if (!id) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "Request id is required");
+  }
   const result = await BloodBankService.updateBloodRequestStatus(id, req.body);
   sendResponse(res, {
     statusCode: StatusCodes.OK,

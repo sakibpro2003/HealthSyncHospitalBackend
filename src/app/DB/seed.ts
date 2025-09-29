@@ -4,6 +4,7 @@
 // import User from '../../../../../../Course/PH/L2/SignatureMart/NextMart-Server/src/app/modules/user/user.model';
 
 import { UserRole } from "../modules/user/user.interface";
+import { User } from "../modules/user/user.model";
 
 const adminUser = {
     email: 'admin@ph.com',

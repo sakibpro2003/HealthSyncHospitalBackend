@@ -22,7 +22,7 @@ const normalizeBloodGroup = (group: string | undefined) => {
   return normalized;
 };
 
-const toObjectId = (value?: string) => {
+const toObjectId = (value?: string): mongoose.Types.ObjectId | undefined => {
   if (!value) return undefined;
   return mongoose.Types.ObjectId.isValid(value)
     ? new mongoose.Types.ObjectId(value)
@@ -318,6 +318,13 @@ const updateBloodRequestStatus = async (
           }
 
           inventory.unitsAvailable -= request.unitsRequested;
+          const requestObjectId =
+            request._id instanceof mongoose.Types.ObjectId
+              ? request._id
+              : new mongoose.Types.ObjectId(
+                  (request._id as mongoose.Types.ObjectId | string).toString()
+                );
+
           inventory.history.push({
             change: -request.unitsRequested,
             balanceAfter: inventory.unitsAvailable,
@@ -325,7 +332,7 @@ const updateBloodRequestStatus = async (
             note:
               payload.notes ??
               `Released for ${request.requesterName} (${request.unitsRequested} units)`,
-            referenceId: request._id,
+            referenceId: requestObjectId,
             actorId,
             actorName: payload.actorName,
             actorRole: payload.actorRole,

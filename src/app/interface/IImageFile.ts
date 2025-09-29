@@ -1,4 +1,4 @@
-import { Express } from 'express';
+import type { Express } from 'express';
 
 // Type definition for multiple image files mapped by fieldname
 export type IImageFiles = Record<string, Express.Multer.File[]>;

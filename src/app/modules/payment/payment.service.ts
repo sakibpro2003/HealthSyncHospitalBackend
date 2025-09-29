@@ -8,15 +8,14 @@ import { User } from "../user/user.model";
 import AppError from "../../errors/appError";
 import { StatusCodes } from "http-status-codes";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-  apiVersion: "2024-06-20",
-});
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
 type RawCheckoutItem = {
   _id?: string;
   productId?: string;
   packageId?: string;
   patientId?: string;
+  userId?: string;
   doctorId?: string;
   appointmentDate?: string;
   appointmentTime?: string;
@@ -331,7 +330,11 @@ export const confirmPayment = async (sessionId: string) => {
         reason: item.reason ?? metadataObject.reason,
       });
 
-      appointmentIds.push(appointment._id.toString());
+      const appointmentObjectId = (appointment._id instanceof mongoose.Types.ObjectId)
+        ? appointment._id
+        : new mongoose.Types.ObjectId((appointment._id as mongoose.Types.ObjectId | string).toString());
+
+      appointmentIds.push(appointmentObjectId.toString());
     }
 
     if (appointmentIds.length) {

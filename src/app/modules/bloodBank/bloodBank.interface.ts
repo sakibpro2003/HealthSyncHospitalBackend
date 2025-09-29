@@ -12,6 +12,7 @@ export type TBloodInventoryHistoryType =
   | "adjustment";
 
 export interface IBloodInventoryHistoryEntry {
+  _id?: Types.ObjectId;
   change: number;
   balanceAfter: number;
   type: TBloodInventoryHistoryType;

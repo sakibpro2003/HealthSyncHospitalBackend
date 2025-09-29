@@ -2,6 +2,7 @@ import { StatusCodes } from "http-status-codes";
 import catchAsync from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { BlogService } from "./blog.service";
+import AppError from "../../errors/appError";
 
 const createBlog = catchAsync(async (req, res) => {
   const result = await BlogService.createBlog(req.body);
@@ -22,8 +23,10 @@ const getAllBlog = catchAsync(async (req, res) => {
   });
 });
 const deleteBlog = catchAsync(async (req, res) => {
-  const param = req.params;
-  const { _id } = param;
+  const { _id } = req.params as { _id?: string };
+  if (!_id) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "Blog id is required");
+  }
   const result = await BlogService.deleteBlog(_id);
   sendResponse(res, {
     statusCode: StatusCodes.OK,
@@ -33,8 +36,10 @@ const deleteBlog = catchAsync(async (req, res) => {
   });
 });
 const updateBlog = catchAsync(async (req, res) => {
-  const param = req.params;
-  const { _id } = param;
+  const { _id } = req.params as { _id?: string };
+  if (!_id) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "Blog id is required");
+  }
   const result = await BlogService.updateBlog(_id, req.body);
   sendResponse(res, {
     statusCode: StatusCodes.OK,
@@ -44,8 +49,10 @@ const updateBlog = catchAsync(async (req, res) => {
   });
 });
 const getSingleBlog = catchAsync(async (req, res) => {
-  const param = req.params;
-  const { _id } = param;
+  const { _id } = req.params as { _id?: string };
+  if (!_id) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "Blog id is required");
+  }
   const result = await BlogService.getSingleBlog(_id);
   sendResponse(res, {
     statusCode: StatusCodes.OK,
