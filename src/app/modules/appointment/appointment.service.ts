@@ -39,7 +39,9 @@ const normaliseTime = (time: string): string => {
 
 const isWithinBookingWindow = (time: string): boolean => {
   const totalMinutes = timeToMinutes(time);
-  return totalMinutes >= BOOKING_START_MINUTE && totalMinutes <= BOOKING_END_MINUTE;
+  return (
+    totalMinutes >= BOOKING_START_MINUTE && totalMinutes <= BOOKING_END_MINUTE
+  );
 };
 
 const ensureSlotAvailable = async (
@@ -58,9 +60,7 @@ const ensureSlotAvailable = async (
     appointmentDate: { $gte: dayStart, $lte: dayEnd },
     appointmentTime,
     status: { $in: ["scheduled", "completed"] },
-    ...(excludeAppointmentId
-      ? { _id: { $ne: excludeAppointmentId } }
-      : {}),
+    ...(excludeAppointmentId ? { _id: { $ne: excludeAppointmentId } } : {}),
   });
 
   if (conflict) {
@@ -71,8 +71,14 @@ const ensureSlotAvailable = async (
 const prepareAppointmentCheckout = async (
   payload: CreateAppointmentPayload
 ) => {
-  const { patient, doctor, appointmentDate, appointmentTime, reason, patientEmail } =
-    payload;
+  const {
+    patient,
+    doctor,
+    appointmentDate,
+    appointmentTime,
+    reason,
+    patientEmail,
+  } = payload;
 
   if (!mongoose.Types.ObjectId.isValid(patient)) {
     throw new Error("Invalid patient id supplied");
@@ -124,7 +130,8 @@ const createAppointmentRecord = async (params: {
   appointmentTime: string;
   reason?: string;
 }): Promise<IAppointment> => {
-  const { patientId, doctorId, appointmentDate, appointmentTime, reason } = params;
+  const { patientId, doctorId, appointmentDate, appointmentTime, reason } =
+    params;
 
   const patientObjectId = new mongoose.Types.ObjectId(patientId);
   const doctorObjectId = new mongoose.Types.ObjectId(doctorId);
@@ -214,7 +221,10 @@ const rescheduleAppointment = async (
     throw new Error("Appointment not found");
   }
 
-  if (payload.patientId && appointment.patient.toString() !== payload.patientId) {
+  if (
+    payload.patientId &&
+    appointment.patient.toString() !== payload.patientId
+  ) {
     throw new Error("You are not authorized to update this appointment");
   }
 

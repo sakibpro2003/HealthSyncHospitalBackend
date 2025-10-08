@@ -11,7 +11,7 @@ import AppError from "../errors/appError";
 import config from "../config";
 
 const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
-  //setting default values
+  // default values
   let statusCode = 500;
   let message = "Something went wrong!";
   let errorSources: TErrorSources = [
@@ -60,7 +60,6 @@ const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
     ];
   }
 
-  // Handle the error response
   res.status(statusCode).json({
     success: false,
     message,
@@ -69,7 +68,6 @@ const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
     stack: config.NODE_ENV === "development" ? err?.stack : null,
   });
 
-  // Do not return anything (ensure this handler does not return a value)
   return;
 };
 
