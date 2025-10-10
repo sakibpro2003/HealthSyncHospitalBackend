@@ -5,6 +5,7 @@ const router = Router();
 
 router.post("/checkout", appointmentController.initiateAppointmentCheckout);
 router.get("/patient/:patientId", appointmentController.getAppointmentsByPatient);
+router.get("/doctor/:doctorId", appointmentController.getAppointmentsByDoctor);
 router.patch(
   "/:appointmentId/reschedule",
   appointmentController.rescheduleAppointment

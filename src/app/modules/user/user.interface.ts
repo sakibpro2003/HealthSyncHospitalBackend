@@ -4,6 +4,7 @@ export enum UserRole {
   ADMIN = "admin",
   USER = "user",
   RECEPTIONIST = "receptionist",
+  DOCTOR = "doctor",
 }
 
 export type IBloodGroup =

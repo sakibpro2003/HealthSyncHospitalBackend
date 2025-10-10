@@ -26,12 +26,12 @@ const deleteDoctor = catchAsync(async (req, res) => {
   });
 });
 const getAllDoctor = catchAsync(async (req, res) => {
-  const result = await DoctorService.getAllDoctor(req.query);
+  const { meta, result } = await DoctorService.getAllDoctor(req.query);
   sendResponse(res, {
     statusCode: StatusCodes.OK,
     success: true,
-    message: "Doctor created successfully",
-    data: { result },
+    message: "Doctors fetched successfully",
+    data: { result, meta },
   });
 });
 

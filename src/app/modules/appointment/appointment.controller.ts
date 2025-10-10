@@ -96,9 +96,26 @@ const rescheduleAppointment = catchAsync(async (req, res) => {
   });
 });
 
+const getAppointmentsByDoctor = catchAsync(async (req, res) => {
+  const { doctorId } = req.params as { doctorId?: string };
+  if (!doctorId) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "Doctor id is required");
+  }
+
+  const result = await appointmentService.getAppointmentsByDoctor(doctorId);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: "Appointments retrieved successfully",
+    data: result,
+  });
+});
+
 export const appointmentController = {
   initiateAppointmentCheckout,
   getAppointmentsByPatient,
+  getAppointmentsByDoctor,
   cancelAppointment,
   rescheduleAppointment,
 };

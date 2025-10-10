@@ -104,12 +104,9 @@ const prepareAppointmentCheckout = async (
     throw new Error("Appointments can only be booked between 08:00 and 22:00");
   }
 
-  const doctorObjectId =
-    doctorRecord._id instanceof mongoose.Types.ObjectId
-      ? doctorRecord._id
-      : new mongoose.Types.ObjectId(
-          (doctorRecord._id as mongoose.Types.ObjectId | string).toString()
-        );
+  const doctorObjectId = new mongoose.Types.ObjectId(
+    (doctorRecord._id as mongoose.Types.ObjectId | string).toString()
+  );
 
   await ensureSlotAvailable(doctorObjectId, parsedDate, normalisedTime);
 
@@ -243,19 +240,13 @@ const rescheduleAppointment = async (
     throw new Error("Appointments can only be booked between 08:00 and 22:00");
   }
 
-  const doctorObjectId =
-    appointment.doctor instanceof mongoose.Types.ObjectId
-      ? appointment.doctor
-      : new mongoose.Types.ObjectId(
-          (appointment.doctor as mongoose.Types.ObjectId | string).toString()
-        );
+  const doctorObjectId = new mongoose.Types.ObjectId(
+    (appointment.doctor as mongoose.Types.ObjectId | string).toString()
+  );
 
-  const appointmentObjectId =
-    appointment._id instanceof mongoose.Types.ObjectId
-      ? appointment._id
-      : new mongoose.Types.ObjectId(
-          (appointment._id as mongoose.Types.ObjectId | string).toString()
-        );
+  const appointmentObjectId = new mongoose.Types.ObjectId(
+    (appointment._id as mongoose.Types.ObjectId | string).toString()
+  );
 
   await ensureSlotAvailable(
     doctorObjectId,
@@ -297,10 +288,68 @@ const getAppointmentsByPatient = async (
     .sort({ appointmentDate: 1, appointmentTime: 1 });
 };
 
+const getAppointmentsByDoctor = async (
+  doctorId: string
+): Promise<IAppointment[]> => {
+  if (!mongoose.Types.ObjectId.isValid(doctorId)) {
+    throw new Error("Invalid doctor id supplied");
+  }
+
+  return Appointment.find({ doctor: doctorId })
+    .populate(
+      "patient",
+      "name email phone"
+    )
+    .sort({ appointmentDate: 1, appointmentTime: 1 });
+};
+
+const completeAppointment = async (
+  appointmentId: string,
+  options: {
+    notes?: string;
+  } = {}
+): Promise<IAppointment> => {
+  if (!mongoose.Types.ObjectId.isValid(appointmentId)) {
+    throw new Error("Invalid appointment id supplied");
+  }
+
+  const appointment = await Appointment.findById(appointmentId);
+
+  if (!appointment) {
+    throw new Error("Appointment not found");
+  }
+
+  if (appointment.status === "cancelled") {
+    throw new Error("Cancelled appointments cannot be completed");
+  }
+
+  appointment.status = "completed";
+
+  if (options.notes) {
+    appointment.notes = options.notes;
+  }
+
+  await appointment.save();
+
+  return appointment.populate([
+    {
+      path: "doctor",
+      select:
+        "name department specialization image consultationFee availability",
+    },
+    {
+      path: "patient",
+      select: "name email",
+    },
+  ]);
+};
+
 export const appointmentService = {
   prepareAppointmentCheckout,
   createAppointmentRecord,
   cancelAppointment,
   rescheduleAppointment,
   getAppointmentsByPatient,
+  getAppointmentsByDoctor,
+  completeAppointment,
 };
