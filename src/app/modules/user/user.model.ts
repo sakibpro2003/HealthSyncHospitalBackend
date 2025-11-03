@@ -47,8 +47,13 @@ const userSchema = new Schema<IUser, UserModel>(
 
     role: {
       type: String,
-      enum: [UserRole.ADMIN, UserRole.RECEPTIONIST, UserRole.USER, UserRole.DOCTOR],
-      default: UserRole.RECEPTIONIST,
+      enum: [
+        UserRole.ADMIN,
+        UserRole.RECEPTIONIST,
+        UserRole.USER,
+        UserRole.DOCTOR,
+      ],
+      default: UserRole.USER,
     },
     isBlocked:{
       type: Boolean,

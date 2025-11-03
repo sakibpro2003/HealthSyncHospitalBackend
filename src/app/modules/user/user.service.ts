@@ -1,18 +1,28 @@
 import { StatusCodes } from "http-status-codes";
 import AppError from "../../errors/appError";
 import { User } from "./user.model";
-import type { IUser } from "./user.interface";
+import { type IUser } from "./user.interface";
 import { QueryBuilder } from "../../builder/QueryBuilder";
-import { searchableFields } from "./user.utils";
+import { normaliseUserRole, searchableFields } from "./user.utils";
 import { Doctor } from "../doctor/doctor.model";
 
 const registerUser = async (userData: IUser) => {
-  const { name, email, password, role, phone } = userData;
-  if (!userData.name || !userData.email || !userData.phone) {
-    throw new AppError(StatusCodes.BAD_REQUEST, "Name and email are required");
+  const { name, email, password, phone } = userData;
+
+  if (!name || !email || !phone || !password) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      "Name, email, phone and password are required"
+    );
   }
-  console.log(userData, "service");
-  const result = await User.create(userData);
+
+  const payload: IUser = {
+    ...userData,
+    email: email.trim().toLowerCase(),
+    role: normaliseUserRole(userData.role),
+  };
+
+  const result = await User.create(payload);
   return result;
 };
 const blockUserFromDB = async (userId) => {

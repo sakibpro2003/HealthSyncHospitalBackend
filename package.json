@@ -1,49 +1,59 @@
 {
-  "name": "healthsynchospitalserver",
-  "module": "index.ts",
-  "devDependencies": {
-    "@types/bun": "latest",
-    "@types/config": "^3.3.5",
-    "@types/cors": "^2.8.18",
-    "@types/express": "^5.0.3",
-    "@types/multer": "^2.0.0",
-    "@types/node": "^24.3.1",
-    "ts-node-dev": "^2.0.0",
-    "typescript": "^5.9.2",
-    "ua-parser-js": "^2.0.4"
-  },
-  "scripts": {
-    "start": "node dist/server.js",
-    "dev": "bun --hot src/server.ts",
-    "build": "tsc",
-    "create-module": "npx ts-node src/scripts/createModule.ts",
-    "deploy": "yarn build && vercel && vercel --prod"
-  },
-  "peerDependencies": {
-    "typescript": "^5"
-  },
-  "private": true,
-  "type": "module",
-  "dependencies": {
-    "@types/cookie-parser": "^1.4.8",
-    "@types/jsonwebtoken": "^9.0.9",
-    "bcryptjs": "^3.0.2",
-    "cloudinary": "^1.37.1",
-    "config": "^4.0.0",
-    "cookie-parser": "^1.4.7",
-    "cors": "^2.8.5",
-    "dotenv": "^16.5.0",
-    "express": "^5.1.0",
-    "http-status": "^2.1.0",
-    "http-status-codes": "^2.3.0",
-    "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.18.0",
-    "multer": "^2.0.2",
-    "multer-storage-cloudinary": "^4.0.0",
-    "os": "^0.1.2",
-    "shurjopay": "^0.12.1",
-    "sslcommerz-lts": "^1.2.0",
-    "stripe": "^18.5.0",
-    "zod": "^3.25.28"
-  }
+    "name":  "healthsynchospitalserver",
+    "module":  "index.ts",
+    "devDependencies":  {
+                            "@types/bun":  "latest",
+                            "@types/config":  "^3.3.5",
+                            "@types/cors":  "^2.8.18",
+                            "@types/express":  "^5.0.3",
+                            "@types/multer":  "^2.0.0",
+                            "@types/node":  "^24.3.1",
+                            "@types/pdfkit":  "^0.17.3",
+                            "@typescript-eslint/eslint-plugin":  "^8.46.2",
+                            "@typescript-eslint/parser":  "^8.46.2",
+                            "@vercel/node":  "^5.5.0",
+                            "eslint":  "^9.38.0",
+                            "ts-node-dev":  "^2.0.0",
+                            "tsup":  "^8.5.0",
+                            "tsx":  "^4.20.6",
+                            "typescript":  "^5.9.2",
+                            "ua-parser-js":  "^2.0.4"
+                        },
+    "scripts":  {
+                    "start":  "node dist/server.js",
+                    "dev":  "bun --hot src/server.ts",
+                    "build":  "node ./node_modules/tsup/dist/cli-default.js src/server.ts src/serverless.ts --format cjs --sourcemap --out-dir dist --clean",
+                    "create-module":  "npx ts-node src/scripts/createModule.ts",
+                    "deploy":  "npm run build \u0026\u0026 vercel --prod",
+                    "lint":  "node ./node_modules/eslint/bin/eslint.js \"src/**/*.ts\"",
+                    "start:vercel":  "node dist/serverless.js"
+                },
+    "peerDependencies":  {
+                             "typescript":  "^5"
+                         },
+    "private":  true,
+    "type":  "commonjs",
+    "dependencies":  {
+                         "@types/cookie-parser":  "^1.4.8",
+                         "@types/jsonwebtoken":  "^9.0.9",
+                         "bcryptjs":  "^3.0.2",
+                         "cloudinary":  "^1.37.1",
+                         "config":  "^4.0.0",
+                         "cookie-parser":  "^1.4.7",
+                         "cors":  "^2.8.5",
+                         "dotenv":  "^16.5.0",
+                         "express":  "^5.1.0",
+                         "http-status":  "^2.1.0",
+                         "http-status-codes":  "^2.3.0",
+                         "jsonwebtoken":  "^9.0.2",
+                         "mongoose":  "^8.18.0",
+                         "multer":  "^2.0.2",
+                         "multer-storage-cloudinary":  "^4.0.0",
+                         "os":  "^0.1.2",
+                         "pdfkit":  "^0.15.0",
+                         "shurjopay":  "^0.12.1",
+                         "sslcommerz-lts":  "^1.2.0",
+                         "stripe":  "^18.5.0",
+                         "zod":  "^3.25.28"
+                     }
 }

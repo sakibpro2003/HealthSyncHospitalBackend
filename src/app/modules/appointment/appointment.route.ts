@@ -1,5 +1,7 @@
 import { Router } from "express";
 import { appointmentController } from "./appointment.controller";
+import auth from "../../middleware/auth";
+import { UserRole } from "../user/user.interface";
 
 const router = Router();
 
@@ -13,6 +15,16 @@ router.patch(
 router.patch(
   "/:appointmentId/cancel",
   appointmentController.cancelAppointment
+);
+router.patch(
+  "/:appointmentId/complete",
+  auth(UserRole.DOCTOR),
+  appointmentController.completeAppointment
+);
+router.get(
+  "/doctor/overview",
+  auth(UserRole.DOCTOR),
+  appointmentController.getDoctorAppointments
 );
 
 export const AppointmentRouter = router;

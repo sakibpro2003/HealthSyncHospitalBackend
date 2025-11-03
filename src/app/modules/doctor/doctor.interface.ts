@@ -15,6 +15,7 @@ export interface IDoctor {
   };
   experience?: string; // e.g., "5 years in Internal Medicine"
   bio?: string;        // A short professional summary about the doctor
+  password?: string;   // Hashed password stored securely (never exposed via API)
   createdAt?: string;
   updatedAt?: string;
 }

@@ -7,10 +7,12 @@ import { AuthServices } from "./auth.service";
 const loginUser = catchAsync(async (req, res) => {
   const { accessToken, refreshToken } = await AuthServices.loginUser(req.body);
 
+  const isProduction = process.env.NODE_ENV === "production";
+
   res.cookie("token", accessToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   });
 
@@ -28,11 +30,14 @@ const loginUser = catchAsync(async (req, res) => {
 });
 
 const logout = catchAsync(async (req, res) => {
-  console.log("lgout controller")
+  console.log("lgout controller");
+  const isProduction = process.env.NODE_ENV === "production";
   res.cookie("token", "", {
     httpOnly: true,
     expires: new Date(0),
     path: "/",
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
   });
 
   sendResponse(res, {
@@ -44,5 +49,6 @@ const logout = catchAsync(async (req, res) => {
 });
 
 export const AuthController = {
-  loginUser,logout
+  loginUser,
+  logout,
 };

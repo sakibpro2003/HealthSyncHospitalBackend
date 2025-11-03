@@ -96,10 +96,42 @@ const rescheduleAppointment = catchAsync(async (req, res) => {
   });
 });
 
-const getAppointmentsByDoctor = catchAsync(async (req, res) => {
-  const { doctorId } = req.params as { doctorId?: string };
+const completeAppointment = catchAsync(async (req, res) => {
+  const { appointmentId } = req.params as { appointmentId?: string };
+  const { notes } = req.body as { notes?: string };
+  const { user } = req;
+
+  if (!appointmentId) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "Appointment id is required");
+  }
+
+  if (!user || user.role !== "doctor") {
+    throw new AppError(
+      StatusCodes.UNAUTHORIZED,
+      "Only doctors can complete appointments"
+    );
+  }
+
+  const result = await appointmentService.completeAppointment(
+    appointmentId,
+    user.userId as string,
+    { notes }
+  );
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: "Appointment marked as completed",
+    data: result,
+  });
+});
+
+const getDoctorAppointments = catchAsync(async (req, res) => {
+  const { user } = req;
+  const doctorId = user?.userId as string | undefined;
+
   if (!doctorId) {
-    throw new AppError(StatusCodes.BAD_REQUEST, "Doctor id is required");
+    throw new AppError(StatusCodes.UNAUTHORIZED, "Doctor identification missing");
   }
 
   const result = await appointmentService.getAppointmentsByDoctor(doctorId);
@@ -107,7 +139,7 @@ const getAppointmentsByDoctor = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: StatusCodes.OK,
     success: true,
-    message: "Appointments retrieved successfully",
+    message: "Doctor appointments retrieved successfully",
     data: result,
   });
 });
@@ -118,4 +150,6 @@ export const appointmentController = {
   getAppointmentsByDoctor,
   cancelAppointment,
   rescheduleAppointment,
+  completeAppointment,
+  getDoctorAppointments,
 };

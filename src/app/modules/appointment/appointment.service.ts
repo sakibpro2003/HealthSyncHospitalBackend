@@ -5,6 +5,10 @@ import type {
 } from "./appointment.interface";
 import { Appointment } from "./appointment.model";
 import { Doctor } from "../doctor/doctor.model";
+import { Prescription } from "../prescription/prescription.model";
+
+const isObjectId = (value: unknown): value is mongoose.Types.ObjectId =>
+  value instanceof mongoose.Types.ObjectId;
 
 const BOOKING_START_MINUTE = 8 * 60; // 08:00
 const BOOKING_END_MINUTE = 22 * 60; // 22:00
@@ -104,9 +108,9 @@ const prepareAppointmentCheckout = async (
     throw new Error("Appointments can only be booked between 08:00 and 22:00");
   }
 
-  const doctorObjectId = new mongoose.Types.ObjectId(
-    (doctorRecord._id as mongoose.Types.ObjectId | string).toString()
-  );
+  const doctorObjectId = isObjectId(doctorRecord._id)
+    ? doctorRecord._id
+    : new mongoose.Types.ObjectId(String(doctorRecord._id));
 
   await ensureSlotAvailable(doctorObjectId, parsedDate, normalisedTime);
 
@@ -288,26 +292,131 @@ const getAppointmentsByPatient = async (
     .sort({ appointmentDate: 1, appointmentTime: 1 });
 };
 
+const combineDateAndTime = (date: Date, time: string): Date => {
+  const [hourStr, minuteStr] = time.split(":");
+  const combined = new Date(date);
+  combined.setHours(Number(hourStr), Number(minuteStr), 0, 0);
+  return combined;
+};
+
 const getAppointmentsByDoctor = async (
   doctorId: string
-): Promise<IAppointment[]> => {
+): Promise<{
+  upcoming: Array<Record<string, unknown>>;
+  history: Array<Record<string, unknown>>;
+  stats: {
+    total: number;
+    scheduled: number;
+    completed: number;
+    cancelled: number;
+  };
+  nextAppointment: Record<string, unknown> | null;
+}> => {
   if (!mongoose.Types.ObjectId.isValid(doctorId)) {
     throw new Error("Invalid doctor id supplied");
   }
 
-  return Appointment.find({ doctor: doctorId })
+  const appointments = await Appointment.find({ doctor: doctorId })
     .populate(
       "patient",
-      "name email phone"
+      "name email phone address"
     )
     .sort({ appointmentDate: 1, appointmentTime: 1 });
+
+  const appointmentIds = appointments.map((appointment) =>
+    isObjectId(appointment._id)
+      ? appointment._id.toString()
+      : String(appointment._id)
+  );
+
+  const prescriptions = await Prescription.find({
+    appointment: { $in: appointmentIds },
+  })
+    .populate("doctor", "name email")
+    .populate("patient", "name email")
+    .lean();
+
+  const prescriptionMap = new Map(
+    prescriptions.map((prescription) => [
+      prescription.appointment.toString(),
+      prescription,
+    ])
+  );
+
+  const now = new Date();
+
+  const upcoming: Array<Record<string, unknown>> = [];
+  const history: Array<Record<string, unknown>> = [];
+  const stats = {
+    total: appointments.length,
+    scheduled: 0,
+    completed: 0,
+    cancelled: 0,
+  };
+
+  appointments.forEach((appointment) => {
+    stats[appointment.status as keyof typeof stats] =
+      (stats[appointment.status as keyof typeof stats] ?? 0) + 1;
+
+    const appointmentDateTime = combineDateAndTime(
+      appointment.appointmentDate,
+      appointment.appointmentTime
+    );
+
+    const appointmentObject = appointment.toObject() as unknown as Record<
+      string,
+      unknown
+    >;
+    const appointmentId = isObjectId(appointment._id)
+      ? appointment._id.toString()
+      : String(appointment._id);
+
+    const prescriptionRecord = prescriptionMap.get(
+      appointmentId
+    ) as
+      | {
+          _id: mongoose.Types.ObjectId;
+          diagnosis?: string;
+          followUpDate?: Date;
+          createdAt?: Date;
+        }
+      | undefined;
+
+    const serialized = {
+      ...appointmentObject,
+      _id: appointmentId,
+      prescription: prescriptionRecord
+        ? {
+            _id: prescriptionRecord._id.toString(),
+            diagnosis: prescriptionRecord.diagnosis,
+            followUpDate: prescriptionRecord.followUpDate,
+            createdAt: prescriptionRecord.createdAt,
+          }
+        : null,
+    };
+
+    if (
+      appointment.status === "scheduled" &&
+      appointmentDateTime.getTime() >= now.getTime()
+    ) {
+      upcoming.push(serialized);
+    } else {
+      history.push(serialized);
+    }
+  });
+
+  return {
+    upcoming,
+    history: history.reverse(), // most recent first
+    stats,
+    nextAppointment: upcoming.length > 0 ? upcoming[0] : null,
+  };
 };
 
 const completeAppointment = async (
   appointmentId: string,
-  options: {
-    notes?: string;
-  } = {}
+  doctorId: string,
+  options: { notes?: string } = {}
 ): Promise<IAppointment> => {
   if (!mongoose.Types.ObjectId.isValid(appointmentId)) {
     throw new Error("Invalid appointment id supplied");
@@ -319,11 +428,21 @@ const completeAppointment = async (
     throw new Error("Appointment not found");
   }
 
+  const appointmentDoctorId = isObjectId(appointment.doctor)
+    ? appointment.doctor.toString()
+    : String(appointment.doctor);
+
+  if (appointmentDoctorId !== doctorId) {
+    throw new Error("You are not authorized to update this appointment");
+  }
+
   if (appointment.status === "cancelled") {
     throw new Error("Cancelled appointments cannot be completed");
   }
 
-  appointment.status = "completed";
+  if (appointment.status !== "completed") {
+    appointment.status = "completed";
+  }
 
   if (options.notes) {
     appointment.notes = options.notes;
@@ -333,13 +452,13 @@ const completeAppointment = async (
 
   return appointment.populate([
     {
-      path: "doctor",
-      select:
-        "name department specialization image consultationFee availability",
+      path: "patient",
+      select: "name email phone address",
     },
     {
-      path: "patient",
-      select: "name email",
+      path: "doctor",
+      select:
+        "name email department specialization image consultationFee availability",
     },
   ]);
 };
