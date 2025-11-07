@@ -114,7 +114,7 @@ const rescheduleAppointment = catchAsync(async (req, res) => {
 
 const completeAppointment = catchAsync(async (req, res) => {
   const { appointmentId } = req.params as { appointmentId?: string };
-  const { notes } = req.body as { notes?: string };
+  const { notes } = (req.body ?? {}) as { notes?: string };
   const { user } = req;
 
   if (!appointmentId) {

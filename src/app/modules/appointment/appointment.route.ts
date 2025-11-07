@@ -7,6 +7,11 @@ const router = Router();
 
 router.post("/checkout", appointmentController.initiateAppointmentCheckout);
 router.get("/patient/:patientId", appointmentController.getAppointmentsByPatient);
+router.get(
+  "/doctor/overview",
+  auth(UserRole.DOCTOR),
+  appointmentController.getDoctorAppointments
+);
 router.get("/doctor/:doctorId", appointmentController.getAppointmentsByDoctor);
 router.patch(
   "/:appointmentId/reschedule",
@@ -21,10 +26,4 @@ router.patch(
   auth(UserRole.DOCTOR),
   appointmentController.completeAppointment
 );
-router.get(
-  "/doctor/overview",
-  auth(UserRole.DOCTOR),
-  appointmentController.getDoctorAppointments
-);
-
 export const AppointmentRouter = router;
