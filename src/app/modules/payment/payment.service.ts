@@ -352,44 +352,43 @@ export const confirmPayment = async (sessionId: string) => {
   return paymentRecord;
 };
 
-const summarisePayments = (payments: any[]) => {
-  const summary = {
-    totalTransactions: payments.length,
-    paidCount: 0,
-    paidAmount: 0,
-    pendingCount: 0,
-    pendingAmount: 0,
-    failedCount: 0,
-    failedAmount: 0,
-  };
-
-  payments.forEach((payment) => {
-    if (payment.status === "paid") {
-      summary.paidCount += 1;
-      summary.paidAmount += payment.amount;
-    } else if (payment.status === "pending") {
-      summary.pendingCount += 1;
-      summary.pendingAmount += payment.amount;
-    } else if (payment.status === "failed") {
-      summary.failedCount += 1;
-      summary.failedAmount += payment.amount;
-    }
-  });
-
-  return summary;
-};
-
 export const getPaymentsByUser = async (
   userId: string,
   query: Record<string, any>
 ) => {
   const pickString = (value: unknown) =>
     Array.isArray(value) ? value[0] : typeof value === "string" ? value : undefined;
+  const pickNumber = (value: unknown): number | undefined => {
+    if (Array.isArray(value) && value.length) {
+      return pickNumber(value[0]);
+    }
+
+    if (typeof value === "string") {
+      const parsed = Number.parseInt(value, 10);
+      return Number.isNaN(parsed) ? undefined : parsed;
+    }
+
+    if (typeof value === "number" && Number.isFinite(value)) {
+      return value;
+    }
+
+    return undefined;
+  };
 
   const status = pickString(query.status);
   const type = pickString(query.type);
   const from = pickString(query.from);
   const to = pickString(query.to);
+  const requestedPage = pickNumber(query.page);
+  const requestedLimit = pickNumber(query.limit);
+  const DEFAULT_LIMIT = 10;
+  const MAX_LIMIT = 50;
+  const page = requestedPage && requestedPage > 0 ? requestedPage : 1;
+  const limit =
+    requestedLimit && requestedLimit > 0
+      ? Math.min(requestedLimit, MAX_LIMIT)
+      : DEFAULT_LIMIT;
+  const skip = (page - 1) * limit;
 
   let userObjectId = toObjectId(userId);
 
@@ -436,15 +435,61 @@ export const getPaymentsByUser = async (
     }
   }
 
+  const total = await Payment.countDocuments(filter);
+
   const payments = await Payment.find(filter)
     .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit)
     .lean();
 
-  const summary = summarisePayments(payments as any);
+  const summaryAggregation = await Payment.aggregate<{
+    _id: string;
+    count: number;
+    amount: number;
+  }>([
+    { $match: { ...filter } },
+    {
+      $group: {
+        _id: "$status",
+        count: { $sum: 1 },
+        amount: { $sum: "$amount" },
+      },
+    },
+  ]);
+
+  const summary = {
+    totalTransactions: total,
+    paidCount: 0,
+    paidAmount: 0,
+    pendingCount: 0,
+    pendingAmount: 0,
+    failedCount: 0,
+    failedAmount: 0,
+  };
+
+  summaryAggregation.forEach((entry) => {
+    if (entry._id === "paid") {
+      summary.paidCount = entry.count;
+      summary.paidAmount = entry.amount;
+    } else if (entry._id === "pending") {
+      summary.pendingCount = entry.count;
+      summary.pendingAmount = entry.amount;
+    } else if (entry._id === "failed") {
+      summary.failedCount = entry.count;
+      summary.failedAmount = entry.amount;
+    }
+  });
 
   return {
     summary,
     payments,
+    meta: {
+      total,
+      page,
+      limit,
+      totalPages: Math.max(1, Math.ceil(total / limit)),
+    },
   };
 };
 
