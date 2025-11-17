@@ -1,11 +1,21 @@
 import dotenv from "dotenv";
 import path from "path";
 
-dotenv.config({ path: path.join((process.cwd(), ".env")) });
+dotenv.config({ path: path.join(process.cwd(), ".env") });
+
+const parseBaseUrls = (value?: string) =>
+  value
+    ?.split(",")
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+    .map((entry) => entry.replace(/\/+$/, "")) ?? [];
+
+const nextBaseUrls = parseBaseUrls(process.env.NEXT_BASE_URL);
 
 export default {
   NODE_ENV: process.env.NODE_ENV,
-  next_base_url:process.env.NEXT_BASE_URL,
+  next_base_url: nextBaseUrls[0],
+  next_base_urls: nextBaseUrls,
   port: process.env.PORT,
   db_url: process.env.DB_URL,
   bcrypt_salt_rounds: process.env.BCRYPT_SALT_ROUNDS,

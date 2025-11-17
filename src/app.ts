@@ -11,9 +11,11 @@ import config from "./app/config";
 const app: Application = express();
 
 const allowedOrigins = new Set(
-  [config.next_base_url, "http://localhost:3000", "http://127.0.0.1:3000"].filter(
-    (value): value is string => Boolean(value)
-  )
+  [
+    ...(config.next_base_urls ?? []),
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+  ].filter((value): value is string => Boolean(value))
 );
 
 app.use(

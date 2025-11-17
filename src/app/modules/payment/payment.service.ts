@@ -51,6 +51,18 @@ type NormalisedCheckoutItem = {
 
 const MINIMUM_CHECKOUT_AMOUNT = 50; // Stripe minimum in BDT (~$0.50)
 
+const buildFrontendUrl = (path: string) => {
+  const baseUrl = config.next_base_url?.replace(/\/+$/, "");
+  if (!baseUrl) {
+    throw new Error(
+      "NEXT_BASE_URL environment variable is required to build redirect URLs"
+    );
+  }
+
+  const cleanedPath = path.startsWith("/") ? path : `/${path}`;
+  return `${baseUrl}${cleanedPath}`;
+};
+
 const normaliseItem = (item: RawCheckoutItem): NormalisedCheckoutItem => {
   const quantity = item.quantity && item.quantity > 0 ? item.quantity : 1;
   if (item.type === "appointment" || item.doctorId) {
@@ -190,12 +202,15 @@ export const createPayment = async (
   });
 
   try {
+    const successUrl = `${buildFrontendUrl("/success-payment")}?session_id={CHECKOUT_SESSION_ID}`;
+    const cancelUrl = buildFrontendUrl("/failed-payment");
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items,
       mode: "payment",
-      success_url: `${config.next_base_url}/success-payment?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${config.next_base_url}/failed-payment`,
+      success_url: successUrl,
+      cancel_url: cancelUrl,
       metadata: {
         paymentId: paymentRecord._id.toString(),
       },
