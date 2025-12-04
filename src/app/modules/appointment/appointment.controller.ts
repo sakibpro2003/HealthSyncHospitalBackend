@@ -40,6 +40,17 @@ const initiateAppointmentCheckout = catchAsync(async (req, res) => {
   });
 });
 
+const bookAppointmentByStaff = catchAsync(async (req, res) => {
+  const appointment = await appointmentService.createAppointmentByStaff(req.body);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.CREATED,
+    success: true,
+    message: "Appointment booked successfully",
+    data: appointment,
+  });
+});
+
 const getAppointmentsByPatient = catchAsync(async (req, res) => {
   const { patientId } = req.params as { patientId?: string };
   if (!patientId) {
@@ -162,6 +173,7 @@ const getDoctorAppointments = catchAsync(async (req, res) => {
 
 export const appointmentController = {
   initiateAppointmentCheckout,
+  bookAppointmentByStaff,
   getAppointmentsByPatient,
   getAppointmentsByDoctor,
   cancelAppointment,

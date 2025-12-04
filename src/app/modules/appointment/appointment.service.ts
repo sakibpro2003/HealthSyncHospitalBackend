@@ -161,6 +161,25 @@ const createAppointmentRecord = async (params: {
   ]);
 };
 
+const createAppointmentByStaff = async (
+  payload: CreateAppointmentPayload
+): Promise<IAppointment> => {
+  const prepared = await prepareAppointmentCheckout(payload);
+
+  const doctorId =
+    isObjectId(prepared.doctor._id) || prepared.doctor._id instanceof mongoose.Types.ObjectId
+      ? prepared.doctor._id.toString()
+      : String(prepared.doctor._id);
+
+  return createAppointmentRecord({
+    patientId: prepared.patientId,
+    doctorId,
+    appointmentDate: prepared.appointmentDate,
+    appointmentTime: prepared.appointmentTime,
+    reason: payload.reason,
+  });
+};
+
 const cancelAppointment = async (
   appointmentId: string,
   patientId?: string
@@ -466,6 +485,7 @@ const completeAppointment = async (
 export const appointmentService = {
   prepareAppointmentCheckout,
   createAppointmentRecord,
+  createAppointmentByStaff,
   cancelAppointment,
   rescheduleAppointment,
   getAppointmentsByPatient,

@@ -6,6 +6,11 @@ import { UserRole } from "../user/user.interface";
 const router = Router();
 
 router.post("/checkout", appointmentController.initiateAppointmentCheckout);
+router.post(
+  "/book",
+  auth(UserRole.RECEPTIONIST, UserRole.ADMIN),
+  appointmentController.bookAppointmentByStaff
+);
 router.get("/patient/:patientId", appointmentController.getAppointmentsByPatient);
 router.get(
   "/doctor/overview",
